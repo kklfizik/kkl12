@@ -4,54 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kandilli Kız Lisesi Fizik Bölümü - Yönetim</title>
+    <meta name="theme-color" content="#5B4FC7">
+    <link rel="icon" type="image/png" href="logo-fizik.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;color:#f8fafc;min-height:100vh;padding:20px}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#191338;color:#F5F3FF;min-height:100vh;padding:20px}
+        .logo-orta{width:96px;display:block;margin:0 auto 14px}
+        .logo-kucuk{width:34px;height:34px;object-fit:contain;vertical-align:middle;margin-right:8px}
         #ekran-sifre{display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh}
-        .sifre-kart{background:#1e293b;padding:40px;border-radius:15px;text-align:center;border:1px solid #334155;width:100%;max-width:400px}
-        .sifre-kart h2{margin-bottom:10px;font-size:20px}
-        .sifre-kart p{color:#94a3b8;font-size:14px;margin-bottom:10px}
-        .versiyon-rozet-koyu{display:inline-block;background:#334155;color:#94a3b8;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
-        .sifre-kart input{padding:15px;font-size:28px;text-align:center;width:160px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;margin-bottom:20px;outline:none;letter-spacing:8px}
-        .sifre-kart input:focus{border-color:#ef4444}
+        .sifre-kart{background:#241B4F;padding:40px;border-radius:15px;text-align:center;border:1px solid #372A6E;width:100%;max-width:400px}
+        .sifre-kart h2{margin-bottom:10px;font-size:20px;color:#F2C230}
+        .sifre-kart p{color:#A79FE8;font-size:14px;margin-bottom:10px}
+        .versiyon-rozet-koyu{display:inline-block;background:#372A6E;color:#C9C2F2;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
+        .sifre-kart input{padding:15px;font-size:28px;text-align:center;width:160px;border-radius:8px;border:2px solid #4a3d8f;background:#191338;color:#fff;margin-bottom:20px;outline:none;letter-spacing:8px}
+        .sifre-kart input:focus{border-color:#F2C230}
         .btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
         .btn-kirmizi{background:#ef4444;color:#fff}
-        .btn-gri{background:#475569;color:#fff}
-        .btn-mor{background:#8b5cf6;color:#fff}
-        .btn-yesil{background:#10b981;color:#fff}
-        .btn-mavi{background:#3b82f6;color:#fff}
+        .btn-gri{background:#584BA0;color:#fff}
+        .btn-mor{background:#7A6FE0;color:#fff}
+        .btn-yesil{background:#F2C230;color:#2E2772}
+        .btn-mavi{background:#5B4FC7;color:#fff}
         #ekran-panel{display:none}
-        .baslik{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ef4444;padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-        .baslik h1{color:#ef4444;font-size:20px}
-        .baslik-versiyon{display:inline-block;background:#334155;color:#94a3b8;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;vertical-align:middle}
+        .baslik{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #F2C230;padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+        .baslik h1{color:#F2C230;font-size:20px}
+        .baslik-versiyon{display:inline-block;background:#372A6E;color:#C9C2F2;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;vertical-align:middle}
         .baslik-butonlar{display:flex;gap:10px}
         .filtre-cubugu{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-        .filtre-cubugu label{font-size:14px;color:#94a3b8;font-weight:600}
-        .sube-buton{padding:10px 20px;border:2px solid #334155;border-radius:8px;background:#1e293b;color:#94a3b8;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-        .sube-buton:hover{border-color:#38bdf8;color:#38bdf8}
-        .sube-buton.aktif{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+        .filtre-cubugu label{font-size:14px;color:#A79FE8;font-weight:600}
+        .sube-buton{padding:10px 20px;border:2px solid #4a3d8f;border-radius:8px;background:#241B4F;color:#A79FE8;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+        .sube-buton:hover{border-color:#F2C230;color:#F2C230}
+        .sube-buton.aktif{background:#F2C230;color:#2E2772;border-color:#F2C230}
         .ozet-kartlari{display:flex;gap:12px;margin-bottom:25px;flex-wrap:wrap}
-        .ozet-kart{background:#1e293b;padding:20px;border-radius:12px;flex:1;min-width:140px;text-align:center;border:1px solid #334155}
-        .ozet-kart .sayi{font-size:30px;font-weight:800;color:#38bdf8}
-        .ozet-kart .metin{color:#94a3b8;font-size:13px;margin-top:5px}
-        .karsilastirma{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:25px;border:1px solid #334155}
-        .karsilastirma h3{font-size:16px;color:#f8fafc;margin-bottom:15px}
+        .ozet-kart{background:#241B4F;padding:20px;border-radius:12px;flex:1;min-width:140px;text-align:center;border:1px solid #372A6E}
+        .ozet-kart .sayi{font-size:30px;font-weight:800;color:#F2C230}
+        .ozet-kart .metin{color:#A79FE8;font-size:13px;margin-top:5px}
+        .karsilastirma{background:#241B4F;border-radius:12px;padding:20px;margin-bottom:25px;border:1px solid #372A6E}
+        .karsilastirma h3{font-size:16px;color:#F5F3FF;margin-bottom:15px}
         .karsilastirma-grid{display:flex;gap:10px;flex-wrap:wrap}
-        .sube-kart{flex:1;min-width:150px;background:#0f172a;border-radius:10px;padding:15px;text-align:center;border:1px solid #334155}
-        .sube-kart .sube-adi{font-size:18px;font-weight:700;color:#f59e0b;margin-bottom:8px}
-        .sube-kart .sube-veri{font-size:13px;color:#94a3b8;margin:3px 0}
-        .sube-kart .sube-veri strong{color:#f8fafc}
+        .sube-kart{flex:1;min-width:150px;background:#191338;border-radius:10px;padding:15px;text-align:center;border:1px solid #372A6E}
+        .sube-kart .sube-adi{font-size:18px;font-weight:700;color:#F2C230;margin-bottom:8px}
+        .sube-kart .sube-veri{font-size:13px;color:#A79FE8;margin:3px 0}
+        .sube-kart .sube-veri strong{color:#F5F3FF}
         .tablo-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-        .tablo-baslik h3{font-size:16px;color:#f8fafc}
-        table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden;margin-bottom:25px}
-        th,td{padding:12px 15px;text-align:left;border-bottom:1px solid #334155;font-size:14px}
-        th{background:#334155;color:#f8fafc;font-weight:600;font-size:13px;text-transform:uppercase}
-        tr:hover{background:#334155;cursor:pointer}
+        .tablo-baslik h3{font-size:16px;color:#F5F3FF}
+        table{width:100%;border-collapse:collapse;background:#241B4F;border-radius:12px;overflow:hidden;margin-bottom:25px}
+        th,td{padding:12px 15px;text-align:left;border-bottom:1px solid #372A6E;font-size:14px}
+        th{background:#372A6E;color:#F5F3FF;font-weight:600;font-size:13px;text-transform:uppercase}
+        tr:hover{background:#372A6E;cursor:pointer}
         .basarili{color:#4ade80;font-weight:700}
         .orta{color:#f59e0b;font-weight:700}
         .basarisiz{color:#f87171;font-weight:700}
+        .net-parlak{color:#F2C230;font-weight:800}
         .sube-rozet{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
         .sube-12A{background:#dbeafe;color:#1e40af}
         .sube-12B{background:#dcfce7;color:#166534}
@@ -59,18 +66,19 @@
         .sube-12F{background:#fce7f3;color:#9d174d}
         .btn-sil{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
         .btn-sil:hover{background:#991b1b;color:#fff}
-        .ogrenci-detay{background:#1e293b;padding:20px;border-radius:12px;margin-top:20px;display:none;border:1px solid #38bdf8}
+        .ogrenci-detay{background:#241B4F;padding:20px;border-radius:12px;margin-top:20px;display:none;border:1px solid #7A6FE0}
         .detay-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}
-        .detay-baslik h2{font-size:18px;color:#38bdf8}
-        .detay-baslik select{padding:8px 14px;border-radius:8px;border:2px solid #334155;background:#0f172a;color:#f8fafc;font-size:14px}
-        .grafik-kutu{background:#0f172a;padding:15px;border-radius:8px;margin-top:15px;height:350px}
-        .btn-kapat{background:#475569;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:10px}
-        .rapor-alani{background:#0f172a;border:1px solid #475569;border-radius:8px;padding:15px;margin-top:20px;display:none}
-        .rapor-alani h4{color:#8b5cf6;margin-bottom:10px}
-        .rapor-textarea{width:100%;height:200px;background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:10px;font-family:inherit;font-size:14px;resize:vertical;margin-bottom:10px;line-height:1.6}
+        .detay-baslik h2{font-size:18px;color:#F2C230}
+        .detay-baslik select{padding:8px 14px;border-radius:8px;border:2px solid #4a3d8f;background:#191338;color:#F5F3FF;font-size:14px}
+        .grafik-kutu{background:#191338;padding:15px;border-radius:8px;margin-top:15px;height:350px}
+        .grafik-kutu-kisa{background:#191338;padding:15px;border-radius:8px;margin-top:15px;height:260px}
+        .btn-kapat{background:#584BA0;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:10px}
+        .rapor-alani{background:#191338;border:1px solid #4a3d8f;border-radius:8px;padding:15px;margin-top:20px;display:none}
+        .rapor-alani h4{color:#F2C230;margin-bottom:10px}
+        .rapor-textarea{width:100%;height:200px;background:#241B4F;color:#F5F3FF;border:1px solid #4a3d8f;border-radius:8px;padding:10px;font-family:inherit;font-size:14px;resize:vertical;margin-bottom:10px;line-height:1.6}
         .rapor-butonlar{display:flex;gap:10px;flex-wrap:wrap}
-        .yukleme{display:none;text-align:center;padding:20px;color:#8b5cf6;font-weight:600}
-        .yukleme-spinner{width:30px;height:30px;border:3px solid #334155;border-top-color:#8b5cf6;border-radius:50%;animation:donme .8s linear infinite;margin:0 auto 10px}
+        .yukleme{display:none;text-align:center;padding:20px;color:#F2C230;font-weight:600}
+        .yukleme-spinner{width:30px;height:30px;border:3px solid #372A6E;border-top-color:#F2C230;border-radius:50%;animation:donme .8s linear infinite;margin:0 auto 10px}
         @keyframes donme{to{transform:rotate(360deg)}}
     </style>
 </head>
@@ -78,6 +86,7 @@
 
     <div id="ekran-sifre">
         <div class="sifre-kart">
+            <img src="logo-fizik.png" class="logo-orta" alt="KKL Fizik">
             <h2>Kandilli Kız Lisesi Fizik Bölümü</h2>
             <p>Öğretmen Yönetim Paneli</p>
             <br>
@@ -91,7 +100,7 @@
 
     <div id="ekran-panel">
         <div class="baslik">
-            <h1>⚛️ Kandilli Kız Lisesi Fizik Kontrol Masası <span class="baslik-versiyon" id="versiyon-panel"></span></h1>
+            <h1><img src="logo-fizik.png" class="logo-kucuk" alt="">Kandilli Kız Lisesi Fizik Kontrol Masası <span class="baslik-versiyon" id="versiyon-panel"></span></h1>
             <div class="baslik-butonlar">
                 <button class="btn btn-gri" onclick="verileriCek()">🔄 Yenile</button>
                 <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış</button>
@@ -121,11 +130,11 @@
         </div>
 
         <div class="tablo-baslik">
-            <h3>Öğrenci Tablosu <span style="color:#64748b;font-size:13px">(Detay: satıra tıkla | Sil: butona tıkla)</span></h3>
+            <h3>Öğrenci Tablosu <span style="color:#A79FE8;font-size:13px">(Detay: satıra tıkla | Sil: butona tıkla)</span></h3>
         </div>
         <table>
             <thead>
-                <tr><th>Kod</th><th>Şube</th><th>Kayıt</th><th>Soru</th><th>Süre</th><th>Başarı</th><th>İşlem</th></tr>
+                <tr><th>Kod</th><th>Şube</th><th>Kayıt</th><th>Soru</th><th>Süre</th><th>Başarı</th><th>Son Net</th><th>İşlem</th></tr>
             </thead>
             <tbody id="tablo-govde"></tbody>
         </table>
@@ -134,7 +143,7 @@
             <div class="detay-baslik">
                 <h2 id="secili-ogrenci-adi"></h2>
                 <div>
-                    <select id="detay-sinav" onchange="ogrenciGrafigiCiz()">
+                    <select id="detay-sinav" onchange="ogrenciGrafigiCiz();ogrenciDenemeGrafigiCiz()">
                         <option value="AYT">AYT Fizik</option>
                         <option value="TYT">TYT Fizik</option>
                     </select>
@@ -152,6 +161,7 @@
             </div>
 
             <div class="grafik-kutu"><canvas id="grafik-detay"></canvas></div>
+            <div class="grafik-kutu-kisa"><canvas id="grafik-deneme-detay"></canvas></div>
 
             <div class="rapor-alani" id="rapor-alani">
                 <h4>📝 Gelişim Raporu (Düzenleyip Gönderebilirsiniz)</h4>
@@ -165,7 +175,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.3.0";
+    var VERSIYON="v2.5.0";
     var OGRETMEN_1_PIN="1234";
     var OGRETMEN_2_PIN="5678";
 
@@ -176,14 +186,9 @@
     var GEMINI_API_KEY='';
 
     async function geminiAnahtariGetir(){
-        var result=await sb
-            .from('api_keys')
-            .select('api_anahtari')
-            .eq('servis_adi','gemini')
-            .single();
+        var result=await sb.from('api_keys').select('api_anahtari').eq('servis_adi','gemini').single();
         if(result.data&&result.data.api_anahtari){
             GEMINI_API_KEY=result.data.api_anahtari;
-            console.log('Gemini API anahtarı Supabase\'den yüklendi.');
         }else{
             console.warn('Gemini API anahtarı Supabase\'de bulunamadı.');
         }
@@ -196,10 +201,12 @@
 
     var SUBELER=['12A','12B','12C','12F'];
     var tumVeriler=[];
+    var tumDenemeler=[];
     var aktifSubeFiltre='TUMU';
     var seciliOgrenciKodu='';
     var seciliOgrenciSubesi='';
     var chartDetay=null;
+    var chartDenemeDetay=null;
 
     window.addEventListener('load',function(){
         document.getElementById('versiyon-giris').textContent='Sürüm '+VERSIYON;
@@ -238,6 +245,8 @@
         var r=await sb.from('fizik_takip').select('*');
         if(r.error){alert('Veri çekilemedi: '+r.error.message);return}
         tumVeriler=r.data||[];
+        var rd=await sb.from('deneme_sinavlari').select('*');
+        tumDenemeler=(rd.data)||[];
         panelGuncelle();
     }
 
@@ -278,20 +287,29 @@
         var c=document.getElementById('sube-karsilastirma');c.innerHTML='';
         SUBELER.forEach(function(sube){
             var sv=tumVeriler.filter(function(v){return v.sube===sube});
+            var dv=tumDenemeler.filter(function(v){return v.sube===sube});
             var os=new Set(sv.map(function(v){return v.ogrenci_kodu})).size;
             var ts=sv.reduce(function(a,v){return a+(v.cozulen_soru||0)},0);
             var tu=sv.reduce(function(a,v){return a+(v.sure_dakika||0)},0);
             var td=sv.reduce(function(a,v){return a+(v.dogru_sayisi||0)},0);
             var ty=sv.reduce(function(a,v){return a+(v.yanlis_sayisi||0)},0);
             var coz=td+ty;var b=coz>0?Math.round((td/coz)*100):0;
+            var ortNet=dv.length?(dv.reduce(function(a,v){return a+(v.net||0)},0)/dv.length).toFixed(2):'-';
             var k=document.createElement('div');k.className='sube-kart';
             k.innerHTML='<div class="sube-adi">'+sube+'</div>'+
                 '<div class="sube-veri">Öğrenci: <strong>'+os+'</strong></div>'+
                 '<div class="sube-veri">Soru: <strong>'+ts+'</strong></div>'+
                 '<div class="sube-veri">Süre: <strong>'+tu+' dk</strong></div>'+
-                '<div class="sube-veri">Başarı: <strong class="'+(b>=60?'basarili':b>=40?'orta':'basarisiz')+'">%'+b+'</strong></div>';
+                '<div class="sube-veri">Başarı: <strong class="'+(b>=60?'basarili':b>=40?'orta':'basarisiz')+'">%'+b+'</strong></div>'+
+                '<div class="sube-veri">Ort. Deneme Neti: <strong class="net-parlak">'+ortNet+'</strong></div>';
             c.appendChild(k);
         });
+    }
+
+    function sonNetBul(kod){
+        var liste=tumDenemeler.filter(function(v){return v.ogrenci_kodu===kod})
+            .sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at)});
+        return liste.length?liste[liste.length-1].net:null;
     }
 
     function tabloyuDoldur(veriler){
@@ -311,22 +329,25 @@
             var coz=o.dogru+o.yanlis;
             var b=coz>0?Math.round((o.dogru/coz)*100):0;
             var bs=b>=60?'basarili':b>=40?'orta':'basarisiz';
+            var sn=sonNetBul(kod);
             var tr=document.createElement('tr');
             tr.onclick=function(){ogrenciSec(kod,o.sube)};
             tr.innerHTML='<td><strong>'+kod+'</strong></td>'+
                 '<td><span class="sube-rozet sube-'+o.sube+'">'+o.sube+'</span></td>'+
                 '<td>'+o.kayit+'</td><td>'+o.soru+'</td><td>'+o.sure+' dk</td>'+
                 '<td class="'+bs+'">%'+b+'</td>'+
+                '<td class="net-parlak">'+((sn!==null)?sn:'-')+'</td>'+
                 '<td><button class="btn-sil" onclick="ogrenciSil(\''+kod+'\',event)">🗑️ Sil</button></td>';
             govde.appendChild(tr);
         });
-        if(sirali.length===0)govde.innerHTML='<tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px">Kayıt bulunamadı.</td></tr>';
+        if(sirali.length===0)govde.innerHTML='<tr><td colspan="8" style="text-align:center;color:#A79FE8;padding:30px">Kayıt bulunamadı.</td></tr>';
     }
 
     async function ogrenciSil(kod,event){
         event.stopPropagation();
-        if(confirm(kod+" kodlu öğrencinin TÜM kayıtları silinecek. Emin misiniz?")){
+        if(confirm(kod+" kodlu öğrencinin TÜM kayıtları (çalışma + deneme) silinecek. Emin misiniz?")){
             var r=await sb.from('fizik_takip').delete().eq('ogrenci_kodu',kod);
+            await sb.from('deneme_sinavlari').delete().eq('ogrenci_kodu',kod);
             if(r.error)alert('Silme hatası: '+r.error.message);
             else{alert(kod+' silindi.');verileriCek()}
         }
@@ -339,23 +360,22 @@
         document.getElementById('rapor-alani').style.display='none';
         document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
         ogrenciGrafigiCiz();
+        ogrenciDenemeGrafigiCiz();
     }
 
     function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
 
     async function aiRaporuOlustur(){
         if(!seciliOgrenciKodu)return;
-
-        if(!GEMINI_API_KEY){
-            await geminiAnahtariGetir();
-        }
+        if(!GEMINI_API_KEY){await geminiAnahtariGetir()}
         if(!GEMINI_API_KEY){
             alert('Gemini API anahtarı Supabase\'den alınamadı.\n\nLütfen Supabase panelindeki api_keys tablosunu kontrol edin.');
             return;
         }
-
         var ogrenciVerileri=tumVeriler.filter(function(v){return v.ogrenci_kodu===seciliOgrenciKodu});
-        if(ogrenciVerileri.length===0){alert('Bu öğrenciye ait veri bulunamadı.');return}
+        if(ogrenciVerileri.length===0&&tumDenemeler.filter(function(v){return v.ogrenci_kodu===seciliOgrenciKodu}).length===0){
+            alert('Bu öğrenciye ait veri bulunamadı.');return;
+        }
 
         var buton=document.getElementById('btn-ai');
         var yukleme=document.getElementById('ai-yukleme');
@@ -387,16 +407,25 @@
             konuMetni+='Konu: '+konu+' | Çözülen: '+k.soru+' | Doğru: '+k.dogru+' | Yanlış: '+k.yanlis+' | Başarı: %'+basari+' | Süre: '+k.sure+'dk | Anlama: '+ortOzguven+'/5\n';
         }
 
+        var ogrenciDenemeleri=tumDenemeler.filter(function(v){return v.ogrenci_kodu===seciliOgrenciKodu})
+            .sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at)});
+        var denemeMetni='';
+        ogrenciDenemeleri.forEach(function(v){
+            denemeMetni+=v.sinav_tipi+' | '+v.deneme_adi+' | Net: '+v.net+' ('+v.dogru+'D '+v.yanlis+'Y '+v.bos+'B)\n';
+        });
+
         var prompt='Sen Kandilli Kız Lisesi\'nde görev yapan deneyimli ve şefkatli bir Fizik öğretmenisin. '+
-            'Aşağıda 12. sınıf öğrencisinin fizik çalışma verileri var. Bu verileri derinlemesine analiz et.\n\n'+
+            'Aşağıda 12. sınıf öğrencisinin fizik çalışma ve deneme sınavı verileri var. Bu verileri derinlemesine analiz et.\n\n'+
             'ÖĞRENCİ KODU: '+seciliOgrenciKodu+' | ŞUBE: '+seciliOgrenciSubesi+'\n'+
             'GENEL: '+toplamSoru+' soru, '+toplamSure+' dk çalışma, %'+genelBasari+' genel başarı\n\n'+
-            'KONU BAZLI DETAYLAR:\n'+konuMetni+'\n\n'+
+            'KONU BAZLI DETAYLAR:\n'+(konuMetni||'Henüz konu kaydı yok.\n')+'\n'+
+            'DENEME SINAVI GEÇMİŞİ:\n'+(denemeMetni||'Henüz deneme kaydı yok.\n')+'\n\n'+
             'LÜTFEN ŞU YAPIDA BİR RAPOR YAZ:\n'+
             '1. 🌟 GÜÇLÜ YÖNLER: En başarılı olduğu 2-3 konuyu belirt ve takdir et.\n'+
             '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver.\n'+
-            '3. 📈 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
-            '4. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
+            '3. 📈 DENEME ANALİZİ: Deneme geçmişi varsa net gelişim trendini yorumla (artış/düşüş/stabil). Yoksa bu bölümü kısa geç.\n'+
+            '4. 📋 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
+            '5. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
             'Raporu doğrudan öğrenciye hitaben yaz. "Sayın '+seciliOgrenciKodu+'" diye başla. '+
             'Fizik terminolojisini doğru kullan. Samimi ama profesyonel bir öğretmen tonu kullan. '+
             'Raporun sonuna "Fizik Öğretmenin" yaz.';
@@ -410,8 +439,7 @@
             });
             var data=await response.json();
             if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]){
-                var aiCevabi=data.candidates[0].content.parts[0].text;
-                document.getElementById('rapor-metin').value=aiCevabi;
+                document.getElementById('rapor-metin').value=data.candidates[0].content.parts[0].text;
                 document.getElementById('rapor-alani').style.display='block';
                 document.getElementById('rapor-alani').scrollIntoView({behavior:'smooth'});
             }else{
@@ -437,14 +465,11 @@
     async function raporuOgrenciyeGonder(){
         var metin=document.getElementById('rapor-metin').value;
         if(!metin||metin.trim()===''){alert('Rapor boş olamaz!');return}
-
         await sb.from('ogretmen_raporlari').delete().eq('ogrenci_kodu',seciliOgrenciKodu);
-
         var r=await sb.from('ogretmen_raporlari').insert([{
             ogrenci_kodu:seciliOgrenciKodu,
             rapor_metni:metin
         }]);
-
         if(r.error)alert('Gönderim hatası: '+r.error.message);
         else{
             alert('✅ Rapor '+seciliOgrenciKodu+' kodlu öğrenciye gönderildi!');
@@ -467,15 +492,46 @@
         chartDetay=new Chart(document.getElementById('grafik-detay'),{
             type:'bar',
             data:{labels:hedef.konular,datasets:[
-                {label:'Çözülen Soru',data:tSoru,backgroundColor:'#38bdf8',borderRadius:6,yAxisID:'y'},
-                {label:'Süre (dk)',data:tSure,backgroundColor:'rgba(245,158,11,0.6)',borderRadius:6,yAxisID:'y1'}
+                {label:'Çözülen Soru',data:tSoru,backgroundColor:'#7A6FE0',borderRadius:6,yAxisID:'y'},
+                {label:'Süre (dk)',data:tSure,backgroundColor:'rgba(242,194,48,0.75)',borderRadius:6,yAxisID:'y1'}
             ]},
             options:{responsive:true,maintainAspectRatio:false,
-                plugins:{legend:{position:'top',labels:{color:'#f8fafc'}}},
+                plugins:{legend:{position:'top',labels:{color:'#F5F3FF'}}},
                 scales:{
-                    y:{beginAtZero:true,position:'left',title:{display:true,text:'Soru',color:'#38bdf8'},ticks:{color:'#94a3b8'},grid:{color:'#334155'}},
-                    y1:{beginAtZero:true,position:'right',title:{display:true,text:'Süre (dk)',color:'#f59e0b'},ticks:{color:'#94a3b8'},grid:{drawOnChartArea:false}},
-                    x:{ticks:{maxRotation:45,minRotation:45,font:{size:11},color:'#94a3b8'},grid:{color:'#334155'}}
+                    y:{beginAtZero:true,position:'left',title:{display:true,text:'Soru',color:'#C9C2F2'},ticks:{color:'#A79FE8'},grid:{color:'#372A6E'}},
+                    y1:{beginAtZero:true,position:'right',title:{display:true,text:'Süre (dk)',color:'#F2C230'},ticks:{color:'#A79FE8'},grid:{drawOnChartArea:false}},
+                    x:{ticks:{maxRotation:45,minRotation:45,font:{size:11},color:'#A79FE8'},grid:{color:'#372A6E'}}
+                }
+            }
+        });
+    }
+
+    function ogrenciDenemeGrafigiCiz(){
+        var tip=document.getElementById('detay-sinav').value;
+        var liste=tumDenemeler.filter(function(v){return v.ogrenci_kodu===seciliOgrenciKodu&&v.sinav_tipi===tip})
+            .sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at)});
+        if(chartDenemeDetay)chartDenemeDetay.destroy();
+        chartDenemeDetay=new Chart(document.getElementById('grafik-deneme-detay'),{
+            type:'line',
+            data:{
+                labels:liste.map(function(v){return v.deneme_adi}),
+                datasets:[{
+                    label:'Fizik Net',
+                    data:liste.map(function(v){return v.net}),
+                    borderColor:'#F2C230',
+                    backgroundColor:'#F2C230',
+                    pointBackgroundColor:'#7A6FE0',
+                    pointRadius:5,
+                    borderWidth:3,
+                    fill:false,
+                    tension:.3
+                }]
+            },
+            options:{responsive:true,maintainAspectRatio:false,
+                plugins:{legend:{position:'top',labels:{color:'#F5F3FF'}}},
+                scales:{
+                    y:{beginAtZero:true,suggestedMax:(tip==='TYT')?7:14,title:{display:true,text:'Net',color:'#C9C2F2'},ticks:{color:'#A79FE8'},grid:{color:'#372A6E'}},
+                    x:{ticks:{color:'#A79FE8',maxRotation:45,minRotation:45,font:{size:11}},grid:{color:'#372A6E'}}
                 }
             }
         });
