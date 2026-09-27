@@ -12,7 +12,8 @@
         #ekran-sifre{display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh}
         .sifre-kart{background:#1e293b;padding:40px;border-radius:15px;text-align:center;border:1px solid #334155;width:100%;max-width:400px}
         .sifre-kart h2{margin-bottom:10px;font-size:20px}
-        .sifre-kart p{color:#94a3b8;font-size:14px;margin-bottom:20px}
+        .sifre-kart p{color:#94a3b8;font-size:14px;margin-bottom:10px}
+        .versiyon-rozet-koyu{display:inline-block;background:#334155;color:#94a3b8;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
         .sifre-kart input{padding:15px;font-size:28px;text-align:center;width:160px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;margin-bottom:20px;outline:none;letter-spacing:8px}
         .sifre-kart input:focus{border-color:#ef4444}
         .btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
@@ -24,6 +25,7 @@
         #ekran-panel{display:none}
         .baslik{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ef4444;padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
         .baslik h1{color:#ef4444;font-size:20px}
+        .baslik-versiyon{display:inline-block;background:#334155;color:#94a3b8;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;vertical-align:middle}
         .baslik-butonlar{display:flex;gap:10px}
         .filtre-cubugu{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
         .filtre-cubugu label{font-size:14px;color:#94a3b8;font-weight:600}
@@ -78,6 +80,9 @@
         <div class="sifre-kart">
             <h2>Kandilli Kız Lisesi Fizik Bölümü</h2>
             <p>Öğretmen Yönetim Paneli</p>
+            <br>
+            <span class="versiyon-rozet-koyu" id="versiyon-giris"></span>
+            <br>
             <input type="password" id="pin-input" maxlength="4" autofocus>
             <br>
             <button class="btn btn-kirmizi" onclick="girisYap()">Giriş</button>
@@ -86,7 +91,7 @@
 
     <div id="ekran-panel">
         <div class="baslik">
-            <h1>⚛️ Kandilli Kız Lisesi Fizik Kontrol Masası</h1>
+            <h1>⚛️ Kandilli Kız Lisesi Fizik Kontrol Masası <span class="baslik-versiyon" id="versiyon-panel"></span></h1>
             <div class="baslik-butonlar">
                 <button class="btn btn-gri" onclick="verileriCek()">🔄 Yenile</button>
                 <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış</button>
@@ -160,7 +165,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.2.0";
+    var VERSIYON="v2.3.0";
     var OGRETMEN_1_PIN="1234";
     var OGRETMEN_2_PIN="5678";
 
@@ -168,10 +173,6 @@
     var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
     var sb=supabase.createClient(SB_URL,SB_KEY);
 
-    // ==========================================
-    // GEMINI API ANAHTARI - KODDA YOK!
-    // Supabase'deki api_keys tablosundan çekilir.
-    // ==========================================
     var GEMINI_API_KEY='';
 
     async function geminiAnahtariGetir(){
@@ -201,10 +202,8 @@
     var chartDetay=null;
 
     window.addEventListener('load',function(){
-        var v=document.createElement('div');
-        v.style.cssText='position:fixed;bottom:8px;right:12px;font-size:10px;color:#475569;opacity:.8;pointer-events:none';
-        v.innerText='KKL Fizik Admin - '+VERSIYON;
-        document.body.appendChild(v);
+        document.getElementById('versiyon-giris').textContent='Sürüm '+VERSIYON;
+        document.getElementById('versiyon-panel').textContent='Sürüm '+VERSIYON;
         if(localStorage.getItem('admin_oturum')==='acik'){panelAc()}
     });
 
@@ -344,11 +343,6 @@
 
     function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
 
-    // ==========================================
-    // GERÇEK YAPAY ZEKA - GEMINI API (v2.2.0)
-    // Model: gemini-2.5-flash
-    // Hata mesajları artık gerçek sebebi gösterir.
-    // ==========================================
     async function aiRaporuOlustur(){
         if(!seciliOgrenciKodu)return;
 
@@ -400,7 +394,7 @@
             'KONU BAZLI DETAYLAR:\n'+konuMetni+'\n\n'+
             'LÜTFEN ŞU YAPIDA BİR RAPOR YAZ:\n'+
             '1. 🌟 GÜÇLÜ YÖNLER: En başarılı olduğu 2-3 konuyu belirt ve takdir et.\n'+
-            '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver (örn: "Çember hareketinde serbest cisim diyagramı çiz", "Manyetik alanda sağ el kuralını 3 boyutlu düşün").\n'+
+            '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver.\n'+
             '3. 📈 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
             '4. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
             'Raporu doğrudan öğrenciye hitaben yaz. "Sayın '+seciliOgrenciKodu+'" diye başla. '+
