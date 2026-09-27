@@ -47,7 +47,8 @@
         .giris-kart .ikon { font-size: 48px; margin-bottom: 10px; }
         .giris-kart h1 { font-size: 24px; color: #1a1a2e; margin-bottom: 6px; }
         .giris-kart p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        .giris-kart input {
+        .giris-kart input,
+        .giris-kart select {
             width: 100%;
             padding: 16px;
             border: 2px solid #e2e8f0;
@@ -56,8 +57,11 @@
             text-align: center;
             outline: none;
             margin-bottom: 15px;
+            background: #fff;
         }
-        .giris-kart input:focus { border-color: #3b82f6; }
+        .giris-kart input:focus,
+        .giris-kart select:focus { border-color: #3b82f6; }
+        .giris-kart select { text-align: center; text-align-last: center; }
 
         .btn {
             width: 100%;
@@ -90,6 +94,17 @@
             display: inline-block;
             background: #e0f2fe;
             color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 4px;
+            margin-right: 6px;
+        }
+        .sube-etiket {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 13px;
@@ -234,6 +249,13 @@
             <h1>Fizik Takip</h1>
             <p>12. Sınıf TYT & AYT Fizik Çalışma Asistanı</p>
             <input type="text" id="input-kod" placeholder="Öğrenci Kodunuz" autocomplete="off" maxlength="30">
+            <select id="input-sube">
+                <option value="" disabled selected>Şubenizi Seçin</option>
+                <option value="12A">12-A</option>
+                <option value="12B">12-B</option>
+                <option value="12C">12-C</option>
+                <option value="12F">12-F</option>
+            </select>
             <button class="btn btn-mavi" onclick="girisYap()">Giriş Yap</button>
         </div>
     </div>
@@ -244,6 +266,7 @@
             <div>
                 <h2>⚛️ Fizik Takip</h2>
                 <span class="kod-etiket" id="etiket-kod"></span>
+                <span class="sube-etiket" id="etiket-sube"></span>
             </div>
             <button class="btn-cikis" onclick="cikisYap()">Çıkış</button>
         </div>
@@ -372,14 +395,17 @@
     };
 
     var aktifKod = '';
+    var aktifSube = '';
     var chartSoru = null;
     var chartSure = null;
 
     // SAYFA YÜKLENDİĞİNDE
     window.addEventListener('load', function() {
-        var kayitli = localStorage.getItem('fizik_kod');
-        if (kayitli) {
-            aktifKod = kayitli;
+        var kayitliKod = localStorage.getItem('fizik_kod');
+        var kayitliSube = localStorage.getItem('fizik_sube');
+        if (kayitliKod && kayitliSube) {
+            aktifKod = kayitliKod;
+            aktifSube = kayitliSube;
             panelGoster();
         }
     });
@@ -391,6 +417,8 @@
 
     function girisYap() {
         var kod = document.getElementById('input-kod').value.trim();
+        var sube = document.getElementById('input-sube').value;
+
         if (!kod) {
             bildirimGoster('Lütfen bir öğrenci kodu girin.', '#ef4444');
             return;
@@ -399,8 +427,15 @@
             bildirimGoster('Kod 3-30 karakter olmalı. Sadece harf, rakam, tire ve alt çizgi kullanın.', '#ef4444');
             return;
         }
+        if (!sube) {
+            bildirimGoster('Lütfen şubenizi seçin.', '#ef4444');
+            return;
+        }
+
         aktifKod = kod;
+        aktifSube = sube;
         localStorage.setItem('fizik_kod', kod);
+        localStorage.setItem('fizik_sube', sube);
         panelGoster();
     }
 
@@ -408,6 +443,7 @@
         document.getElementById('ekran-giris').style.display = 'none';
         document.getElementById('ekran-panel').style.display = 'block';
         document.getElementById('etiket-kod').textContent = aktifKod;
+        document.getElementById('etiket-sube').textContent = aktifSube;
         modalKonulariGuncelle();
         veriGetir();
     }
@@ -415,6 +451,7 @@
     function cikisYap() {
         if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
             localStorage.removeItem('fizik_kod');
+            localStorage.removeItem('fizik_sube');
             location.reload();
         }
     }
@@ -456,6 +493,7 @@
 
         var result = await sb.from('fizik_takip').insert([{
             ogrenci_kodu: aktifKod,
+            sube: aktifSube,
             sinav_tipi: sinav,
             konu: konu,
             sure_dakika: sure,
@@ -512,7 +550,6 @@
             toplamYanlis += (kayit.yanlis_sayisi || 0);
         });
 
-        // İstatistikleri güncelle
         var toplamSoruSayisi = toplamSoru.reduce(function(a, b) { return a + b; }, 0);
         var toplamSureSayisi = toplamSure.reduce(function(a, b) { return a + b; }, 0);
         var toplamCozulen = toplamDogru + toplamYanlis;
