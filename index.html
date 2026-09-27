@@ -18,7 +18,8 @@
         .giris-kart{background:rgba(255,255,255,.96);border-radius:20px;padding:40px 30px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
         .giris-kart .ikon{font-size:48px;margin-bottom:10px}
         .giris-kart h1{font-size:22px;color:#1a1a2e;margin-bottom:6px;line-height:1.3}
-        .giris-kart p{color:#64748b;font-size:14px;margin-bottom:25px}
+        .giris-kart p{color:#64748b;font-size:14px;margin-bottom:10px}
+        .versiyon-rozet{display:inline-block;background:#e2e8f0;color:#475569;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
         .giris-kart input,.giris-kart select{width:100%;padding:16px;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;text-align:center;outline:none;margin-bottom:15px;background:#fff}
         .giris-kart input:focus,.giris-kart select:focus{border-color:#3b82f6}
         .giris-kart select{text-align-last:center}
@@ -31,6 +32,7 @@
         .panel-ust h2{font-size:16px;color:#1a1a2e}
         .kod-etiket{display:inline-block;background:#e0f2fe;color:#0369a1;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px;margin-right:6px}
         .sube-etiket{display:inline-block;background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px}
+        .panel-versiyon{display:inline-block;background:#e2e8f0;color:#475569;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:4px}
         .btn-cikis{background:#fee2e2;color:#dc2626;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
         .istatistik-satir{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
         .istatistik-kart{flex:1;min-width:100px;background:#fff;border-radius:12px;padding:15px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -53,17 +55,19 @@
         .form-satir .form-grup{flex:1}
         .bildirim{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:12px;font-weight:600;font-size:15px;z-index:2000;color:#fff;display:none;box-shadow:0 5px 20px rgba(0,0,0,.2)}
 
-        /* ÖĞRETMEN MESAJI - DAR / GENİŞ */
-        .rapor-kart{background:#fffbeb;border:1px solid #fcd34d;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;cursor:pointer;transition:all .3s ease}
-        .rapor-baslik{display:flex;justify-content:space-between;align-items:center;padding:15px 20px}
+        /* ÖĞRETMEN MESAJI - DAR BAŞLAR, İÇİ KAYDIRILABİLİR */
+        .rapor-kart{background:#fffbeb;border:1px solid #fcd34d;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+        .rapor-baslik{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;cursor:pointer;user-select:none}
         .rapor-baslik h3{font-size:15px;color:#92400e;display:flex;align-items:center;gap:8px;margin:0}
         .rapor-baslik .ok{font-size:18px;color:#92400e;transition:transform .3s ease}
         .rapor-kart.genis .rapor-baslik .ok{transform:rotate(180deg)}
         .rapor-icerik{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease;padding:0 20px}
-        .rapor-kart.genis .rapor-icerik{max-height:600px;padding:0 20px 20px}
-        .rapor-metni{font-size:14px;color:#78350f;white-space:pre-wrap;line-height:1.6;background:rgba(255,255,255,.6);padding:12px;border-radius:8px}
+        .rapor-kart.genis .rapor-icerik{max-height:65vh;overflow-y:auto;padding:0 20px 20px}
+        .rapor-icerik::-webkit-scrollbar{width:8px}
+        .rapor-icerik::-webkit-scrollbar-track{background:rgba(255,255,255,.4);border-radius:4px}
+        .rapor-icerik::-webkit-scrollbar-thumb{background:#fcd34d;border-radius:4px}
+        .rapor-metni{font-size:14px;color:#78350f;line-height:1.7;background:rgba(255,255,255,.6);padding:12px;border-radius:8px}
         .rapor-tarihi{font-size:12px;color:#b45309;margin-top:10px;text-align:right}
-        .rapor-kart.genis{cursor:default}
     </style>
 </head>
 <body>
@@ -74,6 +78,8 @@
             <div class="ikon">⚛️</div>
             <h1>Kandilli Kız Lisesi<br>Fizik Bölümü</h1>
             <p>12. Sınıf TYT & AYT Fizik Çalışma Asistanı</p>
+            <br>
+            <span class="versiyon-rozet" id="versiyon-giris"></span>
             <input type="text" id="input-kod" placeholder="Öğrenci Kodunuz" autocomplete="off" maxlength="30">
             <select id="input-sube">
                 <option value="" disabled selected>Şubenizi Seçin</option>
@@ -92,11 +98,11 @@
                 <h2>⚛️ Kandilli Kız Lisesi Fizik</h2>
                 <span class="kod-etiket" id="etiket-kod"></span>
                 <span class="sube-etiket" id="etiket-sube"></span>
+                <span class="panel-versiyon" id="versiyon-panel"></span>
             </div>
             <button class="btn-cikis" onclick="cikisYap()">Çıkış</button>
         </div>
 
-        <!-- ÖĞRETMEN MESAJI (DAR BAŞLAR, TIKLAYINCA GENİŞLER) -->
         <div id="raporlar-alani"></div>
 
         <div class="istatistik-satir">
@@ -159,7 +165,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.0.0";
+    var VERSIYON="v2.3.0";
     var SB_URL='https://qatthkcayytafdhiogyp.supabase.co';
     var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
     var sb=supabase.createClient(SB_URL,SB_KEY);
@@ -183,10 +189,10 @@
     var chartSure=null;
 
     window.addEventListener('load',function(){
-        var v=document.createElement('div');
-        v.style.cssText='position:fixed;bottom:8px;right:12px;font-size:10px;color:#94a3b8;opacity:.8;pointer-events:none';
-        v.innerText='Kandilli Kız Lisesi - '+VERSIYON;
-        document.body.appendChild(v);
+        // Versiyon rozetlerini doldur
+        document.getElementById('versiyon-giris').textContent='Sürüm '+VERSIYON;
+        document.getElementById('versiyon-panel').textContent='Sürüm '+VERSIYON;
+
         var kk=localStorage.getItem('fizik_kod');
         var ks=localStorage.getItem('fizik_sube');
         if(kk&&ks){aktifKod=kk;aktifSube=ks;panelGoster()}
@@ -287,8 +293,25 @@
     }
 
     // ==========================================
+    // MARKDOWN DÜZENLEYİCİ
+    // AI'ın yazdığı ###, **, --- işaretlerini
+    // düzgün başlık ve kalın yazıya çevirir.
+    // ==========================================
+    function markdownDuzenle(metin){
+        var s=metin.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        s=s.replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid #fcd34d;margin:12px 0">');
+        s=s.replace(/^### (.*)$/gm,'<strong style="display:block;font-size:15px;margin:12px 0 6px;color:#92400e">$1</strong>');
+        s=s.replace(/^## (.*)$/gm,'<strong style="display:block;font-size:16px;margin:12px 0 6px;color:#92400e">$1</strong>');
+        s=s.replace(/^\* /gm,'• ');
+        s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+        s=s.replace(/\n/g,'<br>');
+        return s;
+    }
+
+    // ==========================================
     // ÖĞRETMEN RAPORU - SADECE EN SON RAPOR
-    // DAR GÖRÜNÜR, TIKLAYINCA GENİŞLER
+    // DAR BAŞLAR, BAŞLIĞA TIKLAYINCA GENİŞLER,
+    // İÇERİK KAYDIRILABİLİR.
     // ==========================================
     async function ogretmenRaporunuGetir(){
         var r=await sb.from('ogretmen_raporlari').select('*')
@@ -309,18 +332,19 @@
 
             var kart=document.createElement('div');
             kart.className='rapor-kart';
-            kart.id='rapor-kart';
             kart.innerHTML='<div class="rapor-baslik">'+
                 '<h3>📩 Öğretmeninizden Yeni Mesaj</h3>'+
                 '<span class="ok">▼</span>'+
             '</div>'+
             '<div class="rapor-icerik">'+
-                '<div class="rapor-metni">'+rapor.rapor_metni+'</div>'+
+                '<div class="rapor-metni">'+markdownDuzenle(rapor.rapor_metni)+'</div>'+
                 '<div class="rapor-tarihi">'+tarih+'</div>'+
             '</div>';
 
-            kart.addEventListener('click',function(){
-                this.classList.toggle('genis');
+            // SADECE BAŞLIK TIKLANINCA AÇ/KAPA
+            // (Böylece mesajı kaydırırken yanlışlıkla kapanmaz)
+            kart.querySelector('.rapor-baslik').addEventListener('click',function(){
+                kart.classList.toggle('genis');
             });
 
             alan.appendChild(kart);
