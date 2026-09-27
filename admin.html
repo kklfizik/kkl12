@@ -160,7 +160,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.1.0";
+    var VERSIYON="v2.2.0";
     var OGRETMEN_1_PIN="1234";
     var OGRETMEN_2_PIN="5678";
 
@@ -345,8 +345,9 @@
     function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
 
     // ==========================================
-    // GERÇEK YAPAY ZEKA - GEMINI API
-    // Anahtar Supabase'den gelir, kodda yazmaz.
+    // GERÇEK YAPAY ZEKA - GEMINI API (v2.2.0)
+    // Model: gemini-2.5-flash
+    // Hata mesajları artık gerçek sebebi gösterir.
     // ==========================================
     async function aiRaporuOlustur(){
         if(!seciliOgrenciKodu)return;
@@ -407,20 +408,21 @@
             'Raporun sonuna "Fizik Öğretmenin" yaz.';
 
         try{
-            var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_API_KEY;
+            var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_API_KEY;
             var response=await fetch(url,{
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
             });
             var data=await response.json();
-            if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]){
+            if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]){
                 var aiCevabi=data.candidates[0].content.parts[0].text;
                 document.getElementById('rapor-metin').value=aiCevabi;
                 document.getElementById('rapor-alani').style.display='block';
                 document.getElementById('rapor-alani').scrollIntoView({behavior:'smooth'});
             }else{
-                alert('Yapay zekadan cevap alınamadı. API kotası dolmuş olabilir.');
+                var hataMesaji=(data.error&&data.error.message)?data.error.message:'Bilinmeyen yanıt';
+                alert('Yapay zeka hatası:\n'+hataMesaji);
                 console.log('API Yanıtı:',data);
             }
         }catch(hata){
