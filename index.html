@@ -8,66 +8,75 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KKL Fizik">
-    <meta name="theme-color" content="#1a1a2e">
+    <meta name="theme-color" content="#5B4FC7">
+    <link rel="icon" type="image/png" href="logo-fizik.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
-        #ekran-giris{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:20px}
-        .giris-kart{background:rgba(255,255,255,.96);border-radius:20px;padding:40px 30px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-        .giris-kart .ikon{font-size:48px;margin-bottom:10px}
-        .giris-kart h1{font-size:22px;color:#1a1a2e;margin-bottom:6px;line-height:1.3}
-        .giris-kart p{color:#64748b;font-size:14px;margin-bottom:10px}
-        .versiyon-rozet{display:inline-block;background:#e2e8f0;color:#475569;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
-        .giris-kart input,.giris-kart select{width:100%;padding:16px;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;text-align:center;outline:none;margin-bottom:15px;background:#fff}
-        .giris-kart input:focus,.giris-kart select:focus{border-color:#3b82f6}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#F4F2FB;color:#1e293b;min-height:100vh}
+        .logo-buyuk{width:130px;display:block;margin:0 auto 14px}
+        .logo-kucuk{width:38px;height:38px;object-fit:contain}
+        #ekran-giris{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#2E2772 0%,#5B4FC7 55%,#7A6FE0 100%);padding:20px}
+        .giris-kart{background:rgba(255,255,255,.97);border-radius:20px;padding:35px 30px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+        .giris-kart h1{font-size:22px;color:#3F3699;margin-bottom:6px;line-height:1.3}
+        .giris-kart p{color:#6b64a8;font-size:14px;margin-bottom:10px}
+        .versiyon-rozet{display:inline-block;background:#EDEAFB;color:#5B4FC7;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:20px}
+        .giris-kart input,.giris-kart select{width:100%;padding:16px;border:2px solid #EDEAFB;border-radius:12px;font-size:18px;text-align:center;outline:none;margin-bottom:15px;background:#fff;color:#2E2772}
+        .giris-kart input:focus,.giris-kart select:focus{border-color:#5B4FC7}
         .giris-kart select{text-align-last:center}
         .btn{width:100%;padding:16px;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer}
-        .btn-mavi{background:#3b82f6;color:#fff}
-        .btn-yesil{background:#10b981;color:#fff}
+        .btn-mavi{background:#5B4FC7;color:#fff;box-shadow:0 4px 15px rgba(91,79,199,.35)}
+        .btn-yesil{background:#F2C230;color:#2E2772;box-shadow:0 4px 15px rgba(242,194,48,.35)}
         .btn-gri{background:#94a3b8;color:#fff;margin-top:10px}
         #ekran-panel{display:none;padding:15px;padding-bottom:30px;max-width:900px;margin:0 auto}
-        .panel-ust{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:15px 20px;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-        .panel-ust h2{font-size:16px;color:#1a1a2e}
-        .kod-etiket{display:inline-block;background:#e0f2fe;color:#0369a1;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px;margin-right:6px}
-        .sube-etiket{display:inline-block;background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px}
-        .panel-versiyon{display:inline-block;background:#e2e8f0;color:#475569;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:4px}
+        .panel-ust{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:15px 20px;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(46,39,114,.08)}
+        .panel-sol{display:flex;align-items:center;gap:10px}
+        .panel-ust h2{font-size:16px;color:#3F3699}
+        .kod-etiket{display:inline-block;background:#EDEAFB;color:#5B4FC7;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px;margin-right:6px}
+        .sube-etiket{display:inline-block;background:#FBF0D2;color:#8a6d1a;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:4px}
+        .panel-versiyon{display:inline-block;background:#EDEAFB;color:#5B4FC7;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:4px}
         .btn-cikis{background:#fee2e2;color:#dc2626;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
         .istatistik-satir{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
-        .istatistik-kart{flex:1;min-width:100px;background:#fff;border-radius:12px;padding:15px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-        .istatistik-kart .deger{font-size:24px;font-weight:800;color:#1a1a2e}
-        .istatistik-kart .etiket{font-size:12px;color:#64748b;margin-top:4px}
+        .istatistik-kart{flex:1;min-width:90px;background:#fff;border-radius:12px;padding:15px;text-align:center;box-shadow:0 2px 10px rgba(46,39,114,.08)}
+        .istatistik-kart .deger{font-size:24px;font-weight:800;color:#3F3699}
+        .istatistik-kart .etiket{font-size:12px;color:#6b64a8;margin-top:4px}
         .kontrol-cubugu{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
-        .kontrol-cubugu select{flex:1;min-width:130px;padding:14px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;background:#fff;outline:none}
-        .btn-ekle{flex:1;min-width:160px;padding:14px 20px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
-        .grafik-kart{background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-        .grafik-kart h3{font-size:16px;color:#334155;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #f1f5f9}
+        .kontrol-cubugu select{flex:1;min-width:130px;padding:14px;border:2px solid #EDEAFB;border-radius:12px;font-size:16px;background:#fff;outline:none;color:#2E2772}
+        .btn-ekle{flex:1;min-width:160px;padding:14px 20px;background:#F2C230;color:#2E2772;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(242,194,48,.3)}
+        .grafik-kart{background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 2px 10px rgba(46,39,114,.08)}
+        .grafik-kart h3{font-size:16px;color:#3F3699;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #EDEAFB}
         .grafik-alan{position:relative;height:320px;width:100%}
-        #modal-veri{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px}
+        .grafik-alan-kisa{position:relative;height:240px;width:100%}
+        #modal-veri{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(46,39,114,.6);z-index:1000;align-items:center;justify-content:center;padding:20px}
         .modal-icerik{background:#fff;border-radius:20px;padding:25px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
-        .modal-icerik h3{font-size:20px;margin-bottom:20px;text-align:center}
+        .modal-icerik h3{font-size:20px;margin-bottom:20px;text-align:center;color:#3F3699}
         .form-grup{margin-bottom:16px}
-        .form-grup label{display:block;font-size:14px;font-weight:600;color:#475569;margin-bottom:6px}
-        .form-grup input,.form-grup select{width:100%;padding:14px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;outline:none}
-        .form-grup input:focus,.form-grup select:focus{border-color:#3b82f6}
+        .form-grup label{display:block;font-size:14px;font-weight:600;color:#5B4FC7;margin-bottom:6px}
+        .form-grup input,.form-grup select{width:100%;padding:14px;border:2px solid #EDEAFB;border-radius:10px;font-size:16px;outline:none;color:#2E2772}
+        .form-grup input:focus,.form-grup select:focus{border-color:#5B4FC7}
         .form-satir{display:flex;gap:10px}
         .form-satir .form-grup{flex:1}
+        .tip-butonlar{display:flex;gap:8px}
+        .tip-btn{flex:1;padding:12px;border:2px solid #EDEAFB;background:#fff;border-radius:10px;font-size:14px;font-weight:700;color:#6b64a8;cursor:pointer}
+        .tip-btn.aktif{border-color:#5B4FC7;color:#5B4FC7;background:#EDEAFB}
+        .net-bilgi{background:#EDEAFB;color:#3F3699;border-radius:10px;padding:10px;text-align:center;font-weight:800;font-size:16px;margin-bottom:10px}
+        .soru-bilgi{font-size:12px;color:#6b64a8;text-align:center;margin-bottom:6px}
         .bildirim{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:12px;font-weight:600;font-size:15px;z-index:2000;color:#fff;display:none;box-shadow:0 5px 20px rgba(0,0,0,.2)}
-
-        /* ÖĞRETMEN MESAJI - DAR BAŞLAR, İÇİ KAYDIRILABİLİR */
-        .rapor-kart{background:#fffbeb;border:1px solid #fcd34d;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+        .rapor-kart{background:#FFFBF0;border:1px solid #F2C230;border-radius:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(46,39,114,.08);overflow:hidden}
         .rapor-baslik{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;cursor:pointer;user-select:none}
-        .rapor-baslik h3{font-size:15px;color:#92400e;display:flex;align-items:center;gap:8px;margin:0}
-        .rapor-baslik .ok{font-size:18px;color:#92400e;transition:transform .3s ease}
+        .rapor-baslik h3{font-size:15px;color:#8a6d1a;display:flex;align-items:center;gap:8px;margin:0}
+        .rapor-baslik .ok{font-size:18px;color:#8a6d1a;transition:transform .3s ease}
         .rapor-kart.genis .rapor-baslik .ok{transform:rotate(180deg)}
         .rapor-icerik{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease;padding:0 20px}
         .rapor-kart.genis .rapor-icerik{max-height:65vh;overflow-y:auto;padding:0 20px 20px}
         .rapor-icerik::-webkit-scrollbar{width:8px}
         .rapor-icerik::-webkit-scrollbar-track{background:rgba(255,255,255,.4);border-radius:4px}
-        .rapor-icerik::-webkit-scrollbar-thumb{background:#fcd34d;border-radius:4px}
-        .rapor-metni{font-size:14px;color:#78350f;line-height:1.7;background:rgba(255,255,255,.6);padding:12px;border-radius:8px}
-        .rapor-tarihi{font-size:12px;color:#b45309;margin-top:10px;text-align:right}
+        .rapor-icerik::-webkit-scrollbar-thumb{background:#F2C230;border-radius:4px}
+        .rapor-metni{font-size:14px;color:#6b5b1f;line-height:1.7;background:rgba(255,255,255,.6);padding:12px;border-radius:8px}
+        .rapor-tarihi{font-size:12px;color:#8a6d1a;margin-top:10px;text-align:right}
     </style>
 </head>
 <body>
@@ -75,7 +84,7 @@
 
     <div id="ekran-giris">
         <div class="giris-kart">
-            <div class="ikon">⚛️</div>
+            <img src="logo-fizik.png" class="logo-buyuk" alt="KKL Fizik">
             <h1>Kandilli Kız Lisesi<br>Fizik Bölümü</h1>
             <p>12. Sınıf TYT & AYT Fizik Çalışma Asistanı</p>
             <br>
@@ -94,11 +103,14 @@
 
     <div id="ekran-panel">
         <div class="panel-ust">
-            <div>
-                <h2>⚛️ Kandilli Kız Lisesi Fizik</h2>
-                <span class="kod-etiket" id="etiket-kod"></span>
-                <span class="sube-etiket" id="etiket-sube"></span>
-                <span class="panel-versiyon" id="versiyon-panel"></span>
+            <div class="panel-sol">
+                <img src="logo-fizik.png" class="logo-kucuk" alt="">
+                <div>
+                    <h2>Kandilli Kız Lisesi Fizik</h2>
+                    <span class="kod-etiket" id="etiket-kod"></span>
+                    <span class="sube-etiket" id="etiket-sube"></span>
+                    <span class="panel-versiyon" id="versiyon-panel"></span>
+                </div>
             </div>
             <button class="btn-cikis" onclick="cikisYap()">Çıkış</button>
         </div>
@@ -109,15 +121,16 @@
             <div class="istatistik-kart"><div class="deger" id="ist-toplam-soru">0</div><div class="etiket">Toplam Soru</div></div>
             <div class="istatistik-kart"><div class="deger" id="ist-toplam-sure">0</div><div class="etiket">Toplam Süre (dk)</div></div>
             <div class="istatistik-kart"><div class="deger" id="ist-basari">%0</div><div class="etiket">Başarı Oranı</div></div>
+            <div class="istatistik-kart"><div class="deger" id="ist-son-net">-</div><div class="etiket">Son Deneme Neti</div></div>
             <div class="istatistik-kart"><div class="deger" id="ist-kayit">0</div><div class="etiket">Çalışma Kaydı</div></div>
         </div>
 
         <div class="kontrol-cubugu">
-            <select id="select-sinav" onchange="veriGetir()">
+            <select id="select-sinav" onchange="veriGetir();denemeGetir()">
                 <option value="AYT" selected>AYT Fizik</option>
                 <option value="TYT">TYT Fizik</option>
             </select>
-            <button class="btn-ekle" onclick="modalAc()">＋ Çalışma Ekle</button>
+            <button class="btn-ekle" onclick="modalAc()">＋ Veri Ekle</button>
         </div>
 
         <div class="grafik-kart">
@@ -128,11 +141,16 @@
             <h3>⏱️ Çalışma Süresi Durumu (Dakika)</h3>
             <div class="grafik-alan"><canvas id="grafik-sure"></canvas></div>
         </div>
+        <div class="grafik-kart">
+            <h3>📈 Deneme Sınavı Net Gelişimi</h3>
+            <div class="grafik-alan-kisa"><canvas id="grafik-deneme"></canvas></div>
+        </div>
     </div>
 
     <div id="modal-veri">
         <div class="modal-icerik">
-            <h3>📝 Çalışma Verisi Gir</h3>
+            <h3>📝 Veri Girişi</h3>
+
             <div class="form-grup">
                 <label>Sınav Tipi</label>
                 <select id="m-sinav" onchange="modalKonulariGuncelle()">
@@ -140,32 +158,58 @@
                     <option value="TYT">TYT Fizik</option>
                 </select>
             </div>
-            <div class="form-grup"><label>Konu</label><select id="m-konu"></select></div>
-            <div class="form-satir">
-                <div class="form-grup"><label>Süre (Dakika)</label><input type="number" id="m-sure" inputmode="numeric" min="0" placeholder="45"></div>
-                <div class="form-grup"><label>Çözülen Soru</label><input type="number" id="m-soru" inputmode="numeric" min="0" placeholder="20"></div>
-            </div>
-            <div class="form-satir">
-                <div class="form-grup"><label>Doğru</label><input type="number" id="m-dogru" inputmode="numeric" min="0" placeholder="15"></div>
-                <div class="form-grup"><label>Yanlış</label><input type="number" id="m-yanlis" inputmode="numeric" min="0" placeholder="3"></div>
-            </div>
+
             <div class="form-grup">
-                <label>Konuyu Anlama Düzeyin</label>
-                <select id="m-ozguven">
-                    <option value="1">1 - Hiç anlamadım</option>
-                    <option value="2">2 - Çok zorlandım</option>
-                    <option value="3" selected>3 - Orta düzeyde</option>
-                    <option value="4">4 - İyi anladım</option>
-                    <option value="5">5 - Çok iyi anladım</option>
-                </select>
+                <label>Giriş Tipi</label>
+                <div class="tip-butonlar">
+                    <button type="button" class="tip-btn aktif" id="tip-calisma" onclick="tipSec('calisma')">📚 Konu / Soru</button>
+                    <button type="button" class="tip-btn" id="tip-deneme" onclick="tipSec('deneme')">📝 Deneme Sınavı</button>
+                </div>
             </div>
+
+            <div id="grup-calisma">
+                <div class="form-grup"><label>Konu</label><select id="m-konu"></select></div>
+                <div class="form-satir">
+                    <div class="form-grup"><label>Süre (Dakika)</label><input type="number" id="m-sure" inputmode="numeric" min="0" placeholder="45"></div>
+                    <div class="form-grup"><label>Çözülen Soru</label><input type="number" id="m-soru" inputmode="numeric" min="0" placeholder="20"></div>
+                </div>
+                <div class="form-satir">
+                    <div class="form-grup"><label>Doğru</label><input type="number" id="m-dogru" inputmode="numeric" min="0" placeholder="15"></div>
+                    <div class="form-grup"><label>Yanlış</label><input type="number" id="m-yanlis" inputmode="numeric" min="0" placeholder="3"></div>
+                </div>
+                <div class="form-grup">
+                    <label>Konuyu Anlama Düzeyin</label>
+                    <select id="m-ozguven">
+                        <option value="1">1 - Hiç anlamadım</option>
+                        <option value="2">2 - Çok zorlandım</option>
+                        <option value="3" selected>3 - Orta düzeyde</option>
+                        <option value="4">4 - İyi anladım</option>
+                        <option value="5">5 - Çok iyi anladım</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="grup-deneme" style="display:none">
+                <div class="form-grup"><label>Deneme Adı</label><input type="text" id="m-deneme-adi" placeholder="Örn: KKL Deneme 3" maxlength="40"></div>
+                <div class="form-satir">
+                    <div class="form-grup"><label>Doğru</label><input type="number" id="m-dogru-d" inputmode="numeric" min="0" placeholder="0" oninput="netHesapla()"></div>
+                    <div class="form-grup"><label>Yanlış</label><input type="number" id="m-yanlis-d" inputmode="numeric" min="0" placeholder="0" oninput="netHesapla()"></div>
+                </div>
+                <div class="form-satir">
+                    <div class="form-grup"><label>Boş</label><input type="number" id="m-bos-d" inputmode="numeric" min="0" placeholder="0"></div>
+                    <div class="form-grup"><label>Süre (Dakika)</label><input type="number" id="m-sure-d" inputmode="numeric" min="0" placeholder="30"></div>
+                </div>
+                <div class="net-bilgi" id="net-bilgi">Fizik Net: 0</div>
+                <p class="soru-bilgi">TYT Fizik: 7 soru • AYT Fizik: 14 soru</p>
+            </div>
+
             <button class="btn btn-yesil" onclick="veriKaydet()">💾 Kaydet</button>
             <button class="btn btn-gri" onclick="modalKapat()">İptal</button>
         </div>
     </div>
 
     <script>
-    var VERSIYON="v2.3.0";
+    var VERSIYON="v2.5.0";
     var SB_URL='https://qatthkcayytafdhiogyp.supabase.co';
     var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
     var sb=supabase.createClient(SB_URL,SB_KEY);
@@ -185,14 +229,15 @@
 
     var aktifKod='';
     var aktifSube='';
+    var aktifTip='calisma';
+    var denemeler=[];
     var chartSoru=null;
     var chartSure=null;
+    var chartDeneme=null;
 
     window.addEventListener('load',function(){
-        // Versiyon rozetlerini doldur
         document.getElementById('versiyon-giris').textContent='Sürüm '+VERSIYON;
         document.getElementById('versiyon-panel').textContent='Sürüm '+VERSIYON;
-
         var kk=localStorage.getItem('fizik_kod');
         var ks=localStorage.getItem('fizik_sube');
         if(kk&&ks){aktifKod=kk;aktifSube=ks;panelGoster()}
@@ -219,6 +264,7 @@
         document.getElementById('etiket-sube').textContent=aktifSube;
         modalKonulariGuncelle();
         veriGetir();
+        denemeGetir();
         ogretmenRaporunuGetir();
     }
 
@@ -233,6 +279,21 @@
     function modalAc(){document.getElementById('modal-veri').style.display='flex';modalKonulariGuncelle()}
     function modalKapat(){document.getElementById('modal-veri').style.display='none'}
 
+    function tipSec(t){
+        aktifTip=t;
+        document.getElementById('tip-calisma').classList.toggle('aktif',t==='calisma');
+        document.getElementById('tip-deneme').classList.toggle('aktif',t==='deneme');
+        document.getElementById('grup-calisma').style.display=(t==='calisma')?'block':'none';
+        document.getElementById('grup-deneme').style.display=(t==='deneme')?'block':'none';
+    }
+
+    function netHesapla(){
+        var d=parseInt(document.getElementById('m-dogru-d').value)||0;
+        var y=parseInt(document.getElementById('m-yanlis-d').value)||0;
+        var net=Math.round((d-y/4)*100)/100;
+        document.getElementById('net-bilgi').textContent='Fizik Net: '+net;
+    }
+
     function modalKonulariGuncelle(){
         var tip=document.getElementById('m-sinav').value;
         var sel=document.getElementById('m-konu');
@@ -243,6 +304,7 @@
     }
 
     async function veriKaydet(){
+        if(aktifTip==='deneme'){await denemeKaydet();return}
         var sinav=document.getElementById('m-sinav').value;
         var konu=document.getElementById('m-konu').value;
         var sure=parseInt(document.getElementById('m-sure').value)||0;
@@ -264,6 +326,32 @@
         modalKapat();
         bildirimGoster('✅ Veri kaydedildi!','#10b981');
         veriGetir();
+    }
+
+    async function denemeKaydet(){
+        var sinav=document.getElementById('m-sinav').value;
+        var ad=document.getElementById('m-deneme-adi').value.trim();
+        var d=parseInt(document.getElementById('m-dogru-d').value)||0;
+        var y=parseInt(document.getElementById('m-yanlis-d').value)||0;
+        var b=parseInt(document.getElementById('m-bos-d').value)||0;
+        var sure=parseInt(document.getElementById('m-sure-d').value)||0;
+        if(!ad){bildirimGoster('Lütfen deneme adı girin.','#ef4444');return}
+        if(d+y+b===0){bildirimGoster('Doğru, yanlış veya boş alanlarından en az birini girin.','#ef4444');return}
+        var net=Math.round((d-y/4)*100)/100;
+        var r=await sb.from('deneme_sinavlari').insert([{
+            ogrenci_kodu:aktifKod,sube:aktifSube,sinav_tipi:sinav,deneme_adi:ad,
+            dogru:d,yanlis:y,bos:b,sure_dakika:sure,net:net
+        }]);
+        if(r.error){bildirimGoster('Hata: '+r.error.message,'#ef4444');return}
+        document.getElementById('m-deneme-adi').value='';
+        document.getElementById('m-dogru-d').value='';
+        document.getElementById('m-yanlis-d').value='';
+        document.getElementById('m-bos-d').value='';
+        document.getElementById('m-sure-d').value='';
+        netHesapla();
+        modalKapat();
+        bildirimGoster('✅ Deneme kaydedildi!','#10b981');
+        denemeGetir();
     }
 
     async function veriGetir(){
@@ -292,44 +380,40 @@
         grafikCiz(tip,tSoru,tSure);
     }
 
-    // ==========================================
-    // MARKDOWN DÜZENLEYİCİ
-    // AI'ın yazdığı ###, **, --- işaretlerini
-    // düzgün başlık ve kalın yazıya çevirir.
-    // ==========================================
+    async function denemeGetir(){
+        var tip=document.getElementById('select-sinav').value;
+        var r=await sb.from('deneme_sinavlari').select('*')
+            .eq('ogrenci_kodu',aktifKod).eq('sinav_tipi',tip)
+            .order('created_at',{ascending:true});
+        if(r.error){console.error('Deneme hatası:',r.error.message);denemeler=[];grafikDenemeCiz(tip);return}
+        denemeler=r.data||[];
+        var sonNet=denemeler.length?denemeler[denemeler.length-1].net:null;
+        document.getElementById('ist-son-net').textContent=(sonNet!==null)?sonNet:'-';
+        grafikDenemeCiz(tip);
+    }
+
     function markdownDuzenle(metin){
         var s=metin.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        s=s.replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid #fcd34d;margin:12px 0">');
-        s=s.replace(/^### (.*)$/gm,'<strong style="display:block;font-size:15px;margin:12px 0 6px;color:#92400e">$1</strong>');
-        s=s.replace(/^## (.*)$/gm,'<strong style="display:block;font-size:16px;margin:12px 0 6px;color:#92400e">$1</strong>');
+        s=s.replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid #F2C230;margin:12px 0">');
+        s=s.replace(/^### (.*)$/gm,'<strong style="display:block;font-size:15px;margin:12px 0 6px;color:#8a6d1a">$1</strong>');
+        s=s.replace(/^## (.*)$/gm,'<strong style="display:block;font-size:16px;margin:12px 0 6px;color:#8a6d1a">$1</strong>');
         s=s.replace(/^\* /gm,'• ');
         s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
         s=s.replace(/\n/g,'<br>');
         return s;
     }
 
-    // ==========================================
-    // ÖĞRETMEN RAPORU - SADECE EN SON RAPOR
-    // DAR BAŞLAR, BAŞLIĞA TIKLAYINCA GENİŞLER,
-    // İÇERİK KAYDIRILABİLİR.
-    // ==========================================
     async function ogretmenRaporunuGetir(){
         var r=await sb.from('ogretmen_raporlari').select('*')
             .eq('ogrenci_kodu',aktifKod)
             .order('olusturma_tarihi',{ascending:false})
             .limit(1);
-
         if(r.error){console.error('Rapor hatası:',r.error.message);return}
-
         var alan=document.getElementById('raporlar-alani');
         alan.innerHTML='';
-
         if(r.data&&r.data.length>0){
             var rapor=r.data[0];
-            var tarih=new Date(rapor.olusturma_tarihi).toLocaleDateString('tr-TR',{
-                day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'
-            });
-
+            var tarih=new Date(rapor.olusturma_tarihi).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
             var kart=document.createElement('div');
             kart.className='rapor-kart';
             kart.innerHTML='<div class="rapor-baslik">'+
@@ -340,13 +424,7 @@
                 '<div class="rapor-metni">'+markdownDuzenle(rapor.rapor_metni)+'</div>'+
                 '<div class="rapor-tarihi">'+tarih+'</div>'+
             '</div>';
-
-            // SADECE BAŞLIK TIKLANINCA AÇ/KAPA
-            // (Böylece mesajı kaydırırken yanlışlıkla kapanmaz)
-            kart.querySelector('.rapor-baslik').addEventListener('click',function(){
-                kart.classList.toggle('genis');
-            });
-
+            kart.querySelector('.rapor-baslik').addEventListener('click',function(){kart.classList.toggle('genis')});
             alan.appendChild(kart);
         }
     }
@@ -358,8 +436,8 @@
         chartSoru=new Chart(document.getElementById('grafik-soru'),{
             type:'bar',
             data:{labels:hedef.konular,datasets:[
-                {label:'Çözülen Soru',data:gercekSoru,backgroundColor:'#3b82f6',borderRadius:6},
-                {label:'Minimum Hedef',data:hedef.minSoru,backgroundColor:'rgba(239,68,68,0.35)',borderColor:'#ef4444',borderWidth:1,borderRadius:6}
+                {label:'Çözülen Soru',data:gercekSoru,backgroundColor:'#5B4FC7',borderRadius:6},
+                {label:'Minimum Hedef',data:hedef.minSoru,backgroundColor:'rgba(242,194,48,0.35)',borderColor:'#F2C230',borderWidth:1,borderRadius:6}
             ]},
             options:{responsive:true,maintainAspectRatio:false,
                 plugins:{legend:{position:'top'}},
@@ -369,12 +447,41 @@
         chartSure=new Chart(document.getElementById('grafik-sure'),{
             type:'bar',
             data:{labels:hedef.konular,datasets:[
-                {label:'Çalışılan Süre',data:gercekSure,backgroundColor:'#10b981',borderRadius:6},
-                {label:'Minimum Hedef',data:hedef.minSure,backgroundColor:'rgba(245,158,11,0.35)',borderColor:'#f59e0b',borderWidth:1,borderRadius:6}
+                {label:'Çalışılan Süre',data:gercekSure,backgroundColor:'#F2C230',borderRadius:6},
+                {label:'Minimum Hedef',data:hedef.minSure,backgroundColor:'rgba(91,79,199,0.30)',borderColor:'#5B4FC7',borderWidth:1,borderRadius:6}
             ]},
             options:{responsive:true,maintainAspectRatio:false,
                 plugins:{legend:{position:'top'}},
                 scales:{y:{beginAtZero:true,title:{display:true,text:'Süre (Dakika)'}},x:{ticks:{maxRotation:45,minRotation:45,font:{size:11}}}}
+            }
+        });
+    }
+
+    function grafikDenemeCiz(tip){
+        if(chartDeneme)chartDeneme.destroy();
+        var maxNet=(tip==='TYT')?7:14;
+        chartDeneme=new Chart(document.getElementById('grafik-deneme'),{
+            type:'line',
+            data:{
+                labels:denemeler.map(function(d){return d.deneme_adi}),
+                datasets:[{
+                    label:'Fizik Net',
+                    data:denemeler.map(function(d){return d.net}),
+                    borderColor:'#F2C230',
+                    backgroundColor:'#F2C230',
+                    pointBackgroundColor:'#5B4FC7',
+                    pointRadius:5,
+                    borderWidth:3,
+                    fill:false,
+                    tension:.3
+                }]
+            },
+            options:{responsive:true,maintainAspectRatio:false,
+                plugins:{legend:{display:false}},
+                scales:{
+                    y:{beginAtZero:true,suggestedMax:maxNet,title:{display:true,text:'Net'}},
+                    x:{ticks:{maxRotation:45,minRotation:45,font:{size:11}}}
+                }
             }
         });
     }
