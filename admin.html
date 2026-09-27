@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Öğretmen Kontrol Paneli - Fizik Takip</title>
+    <title>Kandilli Kız Lisesi Fizik Bölümü - Yönetim</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
@@ -33,7 +33,7 @@
             width: 100%;
             max-width: 400px;
         }
-        .sifre-kart h2 { margin-bottom: 10px; }
+        .sifre-kart h2 { margin-bottom: 10px; font-size: 20px; }
         .sifre-kart p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
         .sifre-kart input {
             padding: 15px;
@@ -63,7 +63,7 @@
             padding-bottom: 12px;
             margin-bottom: 20px;
         }
-        .baslik h1 { color: #ef4444; font-size: 22px; }
+        .baslik h1 { color: #ef4444; font-size: 20px; }
         .baslik-butonlar { display: flex; gap: 10px; }
 
         /* ŞUBE FİLTRE ÇUBUĞU */
@@ -216,8 +216,8 @@
     <!-- ŞİFRE EKRANI -->
     <div id="ekran-sifre">
         <div class="sifre-kart">
-            <h2>🔒 Öğretmen Paneli</h2>
-            <p>Erişim PIN kodunuzu giriniz.<br><small>(Bir kez girdikten sonra bu cihazda hatırlanacaktır.)</small></p>
+            <h2>Kandilli Kız Lisesi Fizik Bölümü</h2>
+            <p>Öğretmen Yönetim Paneli<br><small>(Oturum bu cihazda hatırlanacaktır)</small></p>
             <input type="password" id="pin-input" maxlength="4" autofocus>
             <br>
             <button class="btn btn-kirmizi" onclick="girisYap()">Giriş</button>
@@ -228,7 +228,7 @@
     <div id="ekran-panel">
 
         <div class="baslik">
-            <h1>⚛️ Fizik Sınıf Kontrol Masası</h1>
+            <h1>⚛️ Kandilli Kız Lisesi Fizik Kontrol Masası</h1>
             <div class="baslik-butonlar">
                 <button class="btn btn-gri" onclick="verileriCek()">🔄 Yenile</button>
                 <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış Yap</button>
@@ -297,13 +297,20 @@
     </div>
 
     <script>
+    // VERSİYON KODU
+    var VERSIYON = "v1.0.0";
+
+    // ==========================================
+    // ÖĞRETMEN ŞİFRELERİ
+    // Buradan şifreleri değiştirebilirsiniz.
+    // ==========================================
+    var OGRETMEN_1_PIN = "1234";
+    var OGRETMEN_2_PIN = "5678";
+
     // SUPABASE BAĞLANTISI
     var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
     var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
     var sb = supabase.createClient(SB_URL, SB_KEY);
-
-    // ÖĞRETMEN ŞİFRESİ
-    var OGRETMEN_PIN = "1234";
 
     // KONULAR
     var HEDEFLER = {
@@ -321,8 +328,21 @@
     var seciliOgrenciKodu = '';
     var chartDetay = null;
 
-    // SAYFA AÇILDIĞINDA OTOMATİK GİRİŞ KONTROLÜ
+    // SAYFA AÇILDIĞINDA
     window.addEventListener('load', function() {
+        // Versiyonu ekrana bas
+        var versiyonDiv = document.createElement('div');
+        versiyonDiv.style.position = 'fixed';
+        versiyonDiv.style.bottom = '8px';
+        versiyonDiv.style.right = '12px';
+        versiyonDiv.style.fontSize = '10px';
+        versiyonDiv.style.color = '#475569';
+        versiyonDiv.style.opacity = '0.8';
+        versiyonDiv.style.pointerEvents = 'none';
+        versiyonDiv.innerText = 'KKL Fizik Admin - ' + VERSIYON;
+        document.body.appendChild(versiyonDiv);
+
+        // Oturum kontrolü
         if (localStorage.getItem('admin_oturum') === 'acik') {
             panelAc();
         }
@@ -334,8 +354,10 @@
     });
 
     function girisYap() {
-        if (document.getElementById('pin-input').value === OGRETMEN_PIN) {
-            // Oturumu cihaza kaydet
+        var girilenPin = document.getElementById('pin-input').value;
+        
+        // 2 Öğretmen Kontrolü
+        if (girilenPin === OGRETMEN_1_PIN || girilenPin === OGRETMEN_2_PIN) {
             localStorage.setItem('admin_oturum', 'acik');
             panelAc();
         } else {
@@ -465,7 +487,6 @@
             var basariSinif = basari >= 60 ? 'basarili' : basari >= 40 ? 'orta' : 'basarisiz';
 
             var tr = document.createElement('tr');
-            // Satıra tıklayınca detay aç
             tr.onclick = function() { ogrenciSec(kod, o.sube); };
             
             tr.innerHTML = '<td><strong>' + kod + '</strong></td>' +
@@ -486,7 +507,6 @@
 
     // ÖĞRENCİ SİLME FONKSİYONU
     async function ogrenciSil(kod, event) {
-        // Satır tıklamasını (detay açılmasını) engelle
         event.stopPropagation();
 
         if (confirm(kod + " kodlu öğrencinin TÜM kayıtları kalıcı olarak silinecek.\n\nEmin misiniz?")) {
@@ -496,7 +516,7 @@
                 alert('Silme hatası: ' + result.error.message);
             } else {
                 alert(kod + ' başarıyla silindi.');
-                verileriCek(); // Listeyi yenile
+                verileriCek();
             }
         }
     }
