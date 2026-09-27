@@ -7,30 +7,208 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-        #ekran-sifre { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
-        .sifre-kart { background: #1e293b; padding: 40px; border-radius: 15px; text-align: center; border: 1px solid #334155; }
-        .sifre-kart input { padding: 15px; font-size: 24px; text-align: center; width: 150px; border-radius: 8px; border: 2px solid #475569; background: #0f172a; color: white; margin: 20px 0;}
-        .btn { padding: 12px 24px; background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ŞİFRE EKRANI */
+        #ekran-sifre {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+        }
+        .sifre-kart {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #334155;
+            width: 100%;
+            max-width: 400px;
+        }
+        .sifre-kart h2 { margin-bottom: 10px; }
+        .sifre-kart p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+        .sifre-kart input {
+            padding: 15px;
+            font-size: 28px;
+            text-align: center;
+            width: 160px;
+            border-radius: 8px;
+            border: 2px solid #475569;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
+            letter-spacing: 8px;
+        }
+        .sifre-kart input:focus { border-color: #ef4444; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .btn-kirmizi { background: #ef4444; color: white; }
+        .btn-gri { background: #475569; color: white; }
+
+        /* PANEL */
         #ekran-panel { display: none; }
-        .baslik { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ef4444; padding-bottom: 10px; margin-bottom: 20px;}
-        h1 { color: #ef4444; margin: 0; font-size: 24px;}
-        
-        .ozet-kartlari { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;}
-        .ozet-kart { background: #1e293b; padding: 20px; border-radius: 10px; flex: 1; min-width: 150px; text-align: center; border: 1px solid #334155;}
-        .ozet-kart .sayi { font-size: 32px; font-weight: bold; color: #38bdf8; }
-        .ozet-kart .metin { color: #94a3b8; font-size: 14px; margin-top: 5px;}
+        .baslik {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ef4444;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .baslik h1 { color: #ef4444; font-size: 22px; }
+        .baslik-butonlar { display: flex; gap: 10px; }
 
-        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; margin-bottom: 30px;}
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; }
-        th { background: #334155; color: #f8fafc; font-weight: 600; }
+        /* ŞUBE FİLTRE ÇUBUĞU */
+        .filtre-cubugu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filtre-cubugu label { font-size: 14px; color: #94a3b8; font-weight: 600; }
+        .sube-buton {
+            padding: 10px 20px;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sube-buton:hover { border-color: #38bdf8; color: #38bdf8; }
+        .sube-buton.aktif { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
+        /* ÖZET KARTLARI */
+        .ozet-kartlari { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .ozet-kart {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        .ozet-kart .sayi { font-size: 30px; font-weight: 800; color: #38bdf8; }
+        .ozet-kart .metin { color: #94a3b8; font-size: 13px; margin-top: 5px; }
+
+        /* ŞUBE KARŞILAŞTIRMA */
+        .karsilastirma {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #334155;
+        }
+        .karsilastirma h3 { font-size: 16px; color: #f8fafc; margin-bottom: 15px; }
+        .karsilastirma-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sube-kart {
+            flex: 1;
+            min-width: 150px;
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        .sube-kart .sube-adi { font-size: 18px; font-weight: 700; color: #f59e0b; margin-bottom: 8px; }
+        .sube-kart .sube-veri { font-size: 13px; color: #94a3b8; margin: 3px 0; }
+        .sube-kart .sube-veri strong { color: #f8fafc; }
+
+        /* TABLO */
+        .tablo-baslik {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .tablo-baslik h3 { font-size: 16px; color: #f8fafc; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { background: #334155; color: #f8fafc; font-weight: 600; font-size: 13px; text-transform: uppercase; }
         tr:hover { background: #334155; cursor: pointer; }
-        .basarili { color: #4ade80; font-weight: bold; }
-        .basarisiz { color: #f87171; font-weight: bold; }
+        .basarili { color: #4ade80; font-weight: 700; }
+        .orta { color: #f59e0b; font-weight: 700; }
+        .basarisiz { color: #f87171; font-weight: 700; }
+        .sube-rozet {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .sube-12A { background: #dbeafe; color: #1e40af; }
+        .sube-12B { background: #dcfce7; color: #166534; }
+        .sube-12C { background: #fef3c7; color: #92400e; }
+        .sube-12F { background: #fce7f3; color: #9d174d; }
 
-        .ogrenci-detay { background: #1e293b; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; border: 1px solid #334155;}
-        .grafik-kutu { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; height: 350px;}
+        /* SİLME BUTONU */
+        .btn-sil {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: 1px solid #991b1b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sil:hover { background: #991b1b; color: white; }
+
+        /* ÖĞRENCİ DETAY */
+        .ogrenci-detay {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #38bdf8;
+        }
+        .detay-baslik {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .detay-baslik h2 { font-size: 18px; color: #38bdf8; }
+        .detay-baslik select {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 14px;
+        }
+        .grafik-kutu { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; height: 350px; }
+        .btn-kapat {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -39,164 +217,368 @@
     <div id="ekran-sifre">
         <div class="sifre-kart">
             <h2>🔒 Öğretmen Paneli</h2>
-            <p style="color: #94a3b8;">Erişim PIN kodunuzu giriniz.</p>
+            <p>Erişim PIN kodunuzu giriniz.<br><small>(Bir kez girdikten sonra bu cihazda hatırlanacaktır.)</small></p>
             <input type="password" id="pin-input" maxlength="4" autofocus>
             <br>
-            <button class="btn" onclick="girisYap()">Giriş</button>
+            <button class="btn btn-kirmizi" onclick="girisYap()">Giriş</button>
         </div>
     </div>
 
     <!-- ANA KONTROL PANELİ -->
     <div id="ekran-panel">
+
         <div class="baslik">
-            <h1>⚛️ Fizik Sınıf İstatistikleri</h1>
-            <button class="btn" style="background: #475569;" onclick="location.reload()">Yenile / Çıkış</button>
+            <h1>⚛️ Fizik Sınıf Kontrol Masası</h1>
+            <div class="baslik-butonlar">
+                <button class="btn btn-gri" onclick="verileriCek()">🔄 Yenile</button>
+                <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış Yap</button>
+            </div>
         </div>
 
+        <!-- ŞUBE FİLTRE ÇUBUĞU -->
+        <div class="filtre-cubugu">
+            <label>Şube Filtresi:</label>
+            <button class="sube-buton aktif" data-sube="TUMU" onclick="subeFiltrele('TUMU', this)">Tümü</button>
+            <button class="sube-buton" data-sube="12A" onclick="subeFiltrele('12A', this)">12-A</button>
+            <button class="sube-buton" data-sube="12B" onclick="subeFiltrele('12B', this)">12-B</button>
+            <button class="sube-buton" data-sube="12C" onclick="subeFiltrele('12C', this)">12-C</button>
+            <button class="sube-buton" data-sube="12F" onclick="subeFiltrele('12F', this)">12-F</button>
+        </div>
+
+        <!-- ÖZET KARTLARI -->
         <div class="ozet-kartlari">
             <div class="ozet-kart"><div class="sayi" id="top-ogrenci">0</div><div class="metin">Aktif Öğrenci</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-kayit">0</div><div class="metin">Toplam Kayıt</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-soru">0</div><div class="metin">Çözülen Soru</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-sure">0</div><div class="metin">Toplam Dakika</div></div>
+            <div class="ozet-kart"><div class="sayi" id="top-basari">%0</div><div class="metin">Ortalama Başarı</div></div>
         </div>
 
-        <h3>Öğrenci Durum Tablosu (Detay için satıra tıklayın)</h3>
-        <table id="ogrenci-tablosu">
+        <!-- ŞUBE KARŞILAŞTIRMA -->
+        <div class="karsilastirma">
+            <h3>📊 Şube Karşılaştırması</h3>
+            <div class="karsilastirma-grid" id="sube-karsilastirma"></div>
+        </div>
+
+        <!-- ÖĞRENCİ TABLOSU -->
+        <div class="tablo-baslik">
+            <h3>Öğrenci Durum Tablosu <span style="color:#64748b; font-size:13px;">(Detay için satıra, silmek için butona tıklayın)</span></h3>
+        </div>
+        <table>
             <thead>
                 <tr>
                     <th>Öğrenci Kodu</th>
-                    <th>Kayıt Sayısı</th>
+                    <th>Şube</th>
+                    <th>Kayıt</th>
                     <th>Toplam Soru</th>
                     <th>Toplam Süre</th>
                     <th>Başarı %</th>
+                    <th>İşlem</th>
                 </tr>
             </thead>
             <tbody id="tablo-govde"></tbody>
         </table>
 
-        <!-- Seçilen Öğrencinin Detaylı Grafiği -->
+        <!-- ÖĞRENCİ DETAY -->
         <div class="ogrenci-detay" id="ogrenci-detay">
-            <h2 id="secili-ogrenci-adi"></h2>
-            <select id="detay-sinav" onchange="ogrenciGrafigiCiz()">
-                <option value="AYT">AYT Fizik</option>
-                <option value="TYT">TYT Fizik</option>
-            </select>
+            <div class="detay-baslik">
+                <h2 id="secili-ogrenci-adi"></h2>
+                <div>
+                    <select id="detay-sinav" onchange="ogrenciGrafigiCiz()">
+                        <option value="AYT">AYT Fizik</option>
+                        <option value="TYT">TYT Fizik</option>
+                    </select>
+                    <button class="btn-kapat" onclick="detayKapat()">✕ Kapat</button>
+                </div>
+            </div>
             <div class="grafik-kutu"><canvas id="grafik-detay"></canvas></div>
         </div>
+
     </div>
 
     <script>
-        // SUPABASE BAĞLANTISI
-        var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
-        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
-        var sb = supabase.createClient(SB_URL, SB_KEY);
+    // SUPABASE BAĞLANTISI
+    var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
+    var sb = supabase.createClient(SB_URL, SB_KEY);
 
-        // ÖĞRETMEN ŞİFRESİ (Burayı değiştirebilirsiniz)
-        var OGRETMEN_PIN = "1044"; 
+    // ÖĞRETMEN ŞİFRESİ
+    var OGRETMEN_PIN = "1234";
 
-        var HEDEFLER = {
-            TYT: { konular: ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "İş, Güç ve Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik Akımı", "Basınç", "Optik", "Dalgalar"] },
-            AYT: { konular: ["Vektörler ve Kuvvet", "Bağıl Hareket", "Newton Hareket Yasaları", "Çember Hareketi", "Basit Harmonik Hareket", "İş ve Enerji", "İtme ve Momentum", "Tork ve Denge", "Elektrik Alan", "Manyetik Alan", "Alternatif Akım", "Modern Fizik", "Atom ve Nükleer Fizik"] }
-        };
-
-        var tumVeriler = [];
-        var seciliOgrenciKodu = "";
-        var chartDetay = null;
-
-        document.getElementById('pin-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') girisYap(); });
-
-        function girisYap() {
-            if (document.getElementById('pin-input').value === OGRETMEN_PIN) {
-                document.getElementById('ekran-sifre').style.display = 'none';
-                document.getElementById('ekran-panel').style.display = 'block';
-                verileriCek();
-            } else {
-                alert("Hatalı PIN kodu!");
-            }
+    // KONULAR
+    var HEDEFLER = {
+        TYT: {
+            konular: ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "İş, Güç ve Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik Akımı", "Basınç", "Optik", "Dalgalar"]
+        },
+        AYT: {
+            konular: ["Vektörler ve Kuvvet", "Bağıl Hareket", "Newton Hareket Yasaları", "Çember Hareketi", "Basit Harmonik Hareket", "İş ve Enerji", "İtme ve Momentum", "Tork ve Denge", "Elektrik Alan", "Manyetik Alan", "Alternatif Akım", "Modern Fizik", "Atom ve Nükleer Fizik"]
         }
+    };
 
-        async function verileriCek() {
-            var result = await sb.from('fizik_takip').select('*');
-            if (result.error) { alert("Veri çekilemedi: " + result.error.message); return; }
+    var SUBELER = ['12A', '12B', '12C', '12F'];
+    var tumVeriler = [];
+    var aktifSubeFiltre = 'TUMU';
+    var seciliOgrenciKodu = '';
+    var chartDetay = null;
+
+    // SAYFA AÇILDIĞINDA OTOMATİK GİRİŞ KONTROLÜ
+    window.addEventListener('load', function() {
+        if (localStorage.getItem('admin_oturum') === 'acik') {
+            panelAc();
+        }
+    });
+
+    // ENTER İLE GİRİŞ
+    document.getElementById('pin-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') girisYap();
+    });
+
+    function girisYap() {
+        if (document.getElementById('pin-input').value === OGRETMEN_PIN) {
+            // Oturumu cihaza kaydet
+            localStorage.setItem('admin_oturum', 'acik');
+            panelAc();
+        } else {
+            alert('Hatalı PIN kodu!');
+            document.getElementById('pin-input').value = '';
+        }
+    }
+
+    function panelAc() {
+        document.getElementById('ekran-sifre').style.display = 'none';
+        document.getElementById('ekran-panel').style.display = 'block';
+        verileriCek();
+    }
+
+    function cikisYap() {
+        if (confirm('Oturumu kapatmak istediğinize emin misiniz? Tekrar giriş yapmanız gerekecektir.')) {
+            localStorage.removeItem('admin_oturum');
+            location.reload();
+        }
+    }
+
+    // VERİ ÇEKME
+    async function verileriCek() {
+        var result = await sb.from('fizik_takip').select('*');
+        if (result.error) {
+            alert('Veri çekilemedi: ' + result.error.message);
+            return;
+        }
+        tumVeriler = result.data || [];
+        panelGuncelle();
+    }
+
+    // ŞUBE FİLTRELEME
+    function subeFiltrele(sube, btn) {
+        aktifSubeFiltre = sube;
+        document.querySelectorAll('.sube-buton').forEach(function(b) {
+            b.classList.remove('aktif');
+        });
+        btn.classList.add('aktif');
+        panelGuncelle();
+    }
+
+    function filtreliVerileriAl() {
+        if (aktifSubeFiltre === 'TUMU') return tumVeriler;
+        return tumVeriler.filter(function(v) { return v.sube === aktifSubeFiltre; });
+    }
+
+    function panelGuncelle() {
+        var veriler = filtreliVerileriAl();
+        ogrencileriHesapla(veriler);
+        subeKarsilastirmaCiz();
+        tabloyuDoldur(veriler);
+    }
+
+    function ogrencileriHesapla(veriler) {
+        var toplamDogru = 0;
+        var toplamYanlis = 0;
+        var ogrenciler = new Set();
+
+        veriler.forEach(function(v) {
+            ogrenciler.add(v.ogrenci_kodu);
+            toplamDogru += (v.dogru_sayisi || 0);
+            toplamYanlis += (v.yanlis_sayisi || 0);
+        });
+
+        var toplamSoru = veriler.reduce(function(a, v) { return a + (v.cozulen_soru || 0); }, 0);
+        var toplamSure = veriler.reduce(function(a, v) { return a + (v.sure_dakika || 0); }, 0);
+        var toplamCozulen = toplamDogru + toplamYanlis;
+        var basari = toplamCozulen > 0 ? Math.round((toplamDogru / toplamCozulen) * 100) : 0;
+
+        document.getElementById('top-ogrenci').textContent = ogrenciler.size;
+        document.getElementById('top-kayit').textContent = veriler.length;
+        document.getElementById('top-soru').textContent = toplamSoru;
+        document.getElementById('top-sure').textContent = toplamSure;
+        document.getElementById('top-basari').textContent = '%' + basari;
+    }
+
+    function subeKarsilastirmaCiz() {
+        var container = document.getElementById('sube-karsilastirma');
+        container.innerHTML = '';
+
+        SUBELER.forEach(function(sube) {
+            var subeVerileri = tumVeriler.filter(function(v) { return v.sube === sube; });
+            var ogrenciSayisi = new Set(subeVerileri.map(function(v) { return v.ogrenci_kodu; })).size;
+            var toplamSoru = subeVerileri.reduce(function(a, v) { return a + (v.cozulen_soru || 0); }, 0);
+            var toplamSure = subeVerileri.reduce(function(a, v) { return a + (v.sure_dakika || 0); }, 0);
+            var toplamDogru = subeVerileri.reduce(function(a, v) { return a + (v.dogru_sayisi || 0); }, 0);
+            var toplamYanlis = subeVerileri.reduce(function(a, v) { return a + (v.yanlis_sayisi || 0); }, 0);
+            var cozulen = toplamDogru + toplamYanlis;
+            var basari = cozulen > 0 ? Math.round((toplamDogru / cozulen) * 100) : 0;
+
+            var kart = document.createElement('div');
+            kart.className = 'sube-kart';
+            kart.innerHTML = '<div class="sube-adi">' + sube + '</div>' +
+                '<div class="sube-veri">Öğrenci: <strong>' + ogrenciSayisi + '</strong></div>' +
+                '<div class="sube-veri">Soru: <strong>' + toplamSoru + '</strong></div>' +
+                '<div class="sube-veri">Süre: <strong>' + toplamSure + ' dk</strong></div>' +
+                '<div class="sube-veri">Başarı: <strong class="' + (basari >= 60 ? 'basarili' : basari >= 40 ? 'orta' : 'basarisiz') + '">% ' + basari + '</strong></div>';
+            container.appendChild(kart);
+        });
+    }
+
+    function tabloyuDoldur(veriler) {
+        var ogrenciler = {};
+        veriler.forEach(function(v) {
+            if (!ogrenciler[v.ogrenci_kodu]) {
+                ogrenciler[v.ogrenci_kodu] = { sube: v.sube || '-', kayit: 0, soru: 0, sure: 0, dogru: 0, yanlis: 0 };
+            }
+            ogrenciler[v.ogrenci_kodu].kayit++;
+            ogrenciler[v.ogrenci_kodu].soru += (v.cozulen_soru || 0);
+            ogrenciler[v.ogrenci_kodu].sure += (v.sure_dakika || 0);
+            ogrenciler[v.ogrenci_kodu].dogru += (v.dogru_sayisi || 0);
+            ogrenciler[v.ogrenci_kodu].yanlis += (v.yanlis_sayisi || 0);
+        });
+
+        var govde = document.getElementById('tablo-govde');
+        govde.innerHTML = '';
+
+        var siraliOgrenciler = Object.keys(ogrenciler).sort(function(a, b) {
+            return ogrenciler[b].soru - ogrenciler[a].soru;
+        });
+
+        siraliOgrenciler.forEach(function(kod) {
+            var o = ogrenciler[kod];
+            var cozulen = o.dogru + o.yanlis;
+            var basari = cozulen > 0 ? Math.round((o.dogru / cozulen) * 100) : 0;
+            var basariSinif = basari >= 60 ? 'basarili' : basari >= 40 ? 'orta' : 'basarisiz';
+
+            var tr = document.createElement('tr');
+            // Satıra tıklayınca detay aç
+            tr.onclick = function() { ogrenciSec(kod, o.sube); };
             
-            tumVeriler = result.data;
-            tabloyuDoldur();
+            tr.innerHTML = '<td><strong>' + kod + '</strong></td>' +
+                '<td><span class="sube-rozet sube-' + o.sube + '">' + o.sube + '</span></td>' +
+                '<td>' + o.kayit + '</td>' +
+                '<td>' + o.soru + '</td>' +
+                '<td>' + o.sure + ' dk</td>' +
+                '<td class="' + basariSinif + '">% ' + basari + '</td>' +
+                '<td><button class="btn-sil" onclick="ogrenciSil(\'' + kod + '\', event)">🗑️ Sil</button></td>';
+            
+            govde.appendChild(tr);
+        });
+
+        if (siraliOgrenciler.length === 0) {
+            govde.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b; padding:30px;">Bu filtreye uygun kayıt bulunamadı.</td></tr>';
         }
+    }
 
-        function tabloyuDoldur() {
-            var ogrenciler = {};
-            tumVeriler.forEach(function(v) {
-                if (!ogrenciler[v.ogrenci_kodu]) {
-                    ogrenciler[v.ogrenci_kodu] = { kayit: 0, soru: 0, sure: 0, dogru: 0, yanlis: 0 };
-                }
-                ogrenciler[v.ogrenci_kodu].kayit++;
-                ogrenciler[v.ogrenci_kodu].soru += (v.cozulen_soru || 0);
-                ogrenciler[v.ogrenci_kodu].sure += (v.sure_dakika || 0);
-                ogrenciler[v.ogrenci_kodu].dogru += (v.dogru_sayisi || 0);
-                ogrenciler[v.ogrenci_kodu].yanlis += (v.yanlis_sayisi || 0);
-            });
+    // ÖĞRENCİ SİLME FONKSİYONU
+    async function ogrenciSil(kod, event) {
+        // Satır tıklamasını (detay açılmasını) engelle
+        event.stopPropagation();
 
-            var govde = document.getElementById('tablo-govde');
-            govde.innerHTML = '';
-            var ogrenciSayisi = 0;
-            var genelSoru = 0, genelSure = 0;
-
-            for (var kod in ogrenciler) {
-                ogrenciSayisi++;
-                var o = ogrenciler[kod];
-                genelSoru += o.soru;
-                genelSure += o.sure;
-                var cozulen = o.dogru + o.yanlis;
-                var basari = cozulen > 0 ? Math.round((o.dogru / cozulen) * 100) : 0;
-                
-                var tr = document.createElement('tr');
-                tr.onclick = function() { ogrenciSec(this.getAttribute('data-kod')); };
-                tr.setAttribute('data-kod', kod);
-                tr.innerHTML = `
-                    <td><strong>${kod}</strong></td>
-                    <td>${o.kayit}</td>
-                    <td>${o.soru}</td>
-                    <td>${o.sure} dk</td>
-                    <td class="${basari >= 60 ? 'basarili' : 'basarisiz'}">%${basari}</td>
-                `;
-                govde.appendChild(tr);
+        if (confirm(kod + " kodlu öğrencinin TÜM kayıtları kalıcı olarak silinecek.\n\nEmin misiniz?")) {
+            var result = await sb.from('fizik_takip').delete().eq('ogrenci_kodu', kod);
+            
+            if (result.error) {
+                alert('Silme hatası: ' + result.error.message);
+            } else {
+                alert(kod + ' başarıyla silindi.');
+                verileriCek(); // Listeyi yenile
             }
-
-            document.getElementById('top-ogrenci').textContent = ogrenciSayisi;
-            document.getElementById('top-kayit').textContent = tumVeriler.length;
-            document.getElementById('top-soru').textContent = genelSoru;
-            document.getElementById('top-sure').textContent = genelSure;
         }
+    }
 
-        function ogrenciSec(kod) {
-            seciliOgrenciKodu = kod;
-            document.getElementById('secili-ogrenci-adi').textContent = "📊 " + kod + " - Detaylı Analiz";
-            document.getElementById('ogrenci-detay').style.display = 'block';
-            ogrenciGrafigiCiz();
-        }
+    // ÖĞRENCİ DETAY
+    function ogrenciSec(kod, sube) {
+        seciliOgrenciKodu = kod;
+        document.getElementById('secili-ogrenci-adi').textContent = '📊 ' + kod + ' (' + sube + ') - Detaylı Analiz';
+        document.getElementById('ogrenci-detay').style.display = 'block';
+        document.getElementById('ogrenci-detay').scrollIntoView({ behavior: 'smooth' });
+        ogrenciGrafigiCiz();
+    }
 
-        function ogrenciGrafigiCiz() {
-            var tip = document.getElementById('detay-sinav').value;
-            var hedef = HEDEFLER[tip];
-            var toplamSoru = new Array(hedef.konular.length).fill(0);
+    function detayKapat() {
+        document.getElementById('ogrenci-detay').style.display = 'none';
+    }
 
-            tumVeriler.forEach(function(v) {
-                if (v.ogrenci_kodu === seciliOgrenciKodu && v.sinav_tipi === tip) {
-                    var idx = hedef.konular.indexOf(v.konu);
-                    if (idx !== -1) toplamSoru[idx] += (v.cozulen_soru || 0);
+    function ogrenciGrafigiCiz() {
+        var tip = document.getElementById('detay-sinav').value;
+        var hedef = HEDEFLER[tip];
+        var toplamSoru = new Array(hedef.konular.length).fill(0);
+        var toplamSure = new Array(hedef.konular.length).fill(0);
+
+        tumVeriler.forEach(function(v) {
+            if (v.ogrenci_kodu === seciliOgrenciKodu && v.sinav_tipi === tip) {
+                var idx = hedef.konular.indexOf(v.konu);
+                if (idx !== -1) {
+                    toplamSoru[idx] += (v.cozulen_soru || 0);
+                    toplamSure[idx] += (v.sure_dakika || 0);
                 }
-            });
+            }
+        });
 
-            if (chartDetay) chartDetay.destroy();
-            chartDetay = new Chart(document.getElementById('grafik-detay'), {
-                type: 'bar',
-                data: {
-                    labels: hedef.konular,
-                    datasets: [{ label: 'Çözülen Soru', data: toplamSoru, backgroundColor: '#38bdf8' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-        }
+        if (chartDetay) chartDetay.destroy();
+        chartDetay = new Chart(document.getElementById('grafik-detay'), {
+            type: 'bar',
+            data: {
+                labels: hedef.konular,
+                datasets: [
+                    {
+                        label: 'Çözülen Soru',
+                        data: toplamSoru,
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Çalışma Süresi (dk)',
+                        data: toplamSure,
+                        backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                        borderRadius: 6,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { color: '#f8fafc' } } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left',
+                        title: { display: true, text: 'Soru Sayısı', color: '#38bdf8' },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        title: { display: true, text: 'Süre (dk)', color: '#f59e0b' },
+                        ticks: { color: '#94a3b8' },
+                        grid: { drawOnChartArea: false }
+                    },
+                    x: {
+                        ticks: { maxRotation: 45, minRotation: 45, font: { size: 11 }, color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    }
+                }
+            }
+        });
+    }
     </script>
 </body>
 </html>
