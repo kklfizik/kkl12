@@ -52,6 +52,8 @@
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
         .btn-kirmizi { background: #ef4444; color: white; }
         .btn-gri { background: #475569; color: white; }
+        .btn-mor { background: #8b5cf6; color: white; }
+        .btn-yesil { background: #10b981; color: white; }
 
         /* PANEL */
         #ekran-panel { display: none; }
@@ -188,6 +190,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .detay-baslik h2 { font-size: 18px; color: #38bdf8; }
         .detay-baslik select {
@@ -208,6 +212,30 @@
             font-size: 13px;
             cursor: pointer;
             margin-left: 10px;
+        }
+
+        /* RAPOR ALANI */
+        .rapor-alani {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none; /* Başta gizli */
+        }
+        .rapor-alani h4 { color: #8b5cf6; margin-bottom: 10px; }
+        .rapor-textarea {
+            width: 100%;
+            height: 150px;
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -291,21 +319,31 @@
                     <button class="btn-kapat" onclick="detayKapat()">✕ Kapat</button>
                 </div>
             </div>
+            
+            <!-- YENİ EKLENEN: AI RAPOR BUTONU -->
+            <div style="margin-bottom: 15px;">
+                <button class="btn btn-mor" onclick="aiRaporuOlustur()">🤖 Yapay Zeka Gelişim Raporu Oluştur</button>
+            </div>
+
             <div class="grafik-kutu"><canvas id="grafik-detay"></canvas></div>
+
+            <!-- RAPOR YAZMA VE GÖNDERME ALANI -->
+            <div class="rapor-alani" id="rapor-alani">
+                <h4>📝 Gelişim Raporu Taslağı (Düzenleyip Gönderebilirsiniz)</h4>
+                <textarea id="rapor-metin" class="rapor-textarea" placeholder="Rapor burada oluşacak..."></textarea>
+                <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()">📤 Öğrenciye Gönder</button>
+            </div>
         </div>
 
     </div>
 
     <script>
     // VERSİYON KODU
-    var VERSIYON = "v1.0.0";
+    var VERSIYON = "v1.2.0"; // AI Rapor özelliği eklendi
 
-    // ==========================================
     // ÖĞRETMEN ŞİFRELERİ
-    // Buradan şifreleri değiştirebilirsiniz.
-    // ==========================================
-    var OGRETMEN_1_PIN = "1044";
-    var OGRETMEN_2_PIN = "2133";
+    var OGRETMEN_1_PIN = "1234";
+    var OGRETMEN_2_PIN = "5678";
 
     // SUPABASE BAĞLANTISI
     var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
@@ -326,11 +364,11 @@
     var tumVeriler = [];
     var aktifSubeFiltre = 'TUMU';
     var seciliOgrenciKodu = '';
+    var seciliOgrenciSubesi = '';
     var chartDetay = null;
 
     // SAYFA AÇILDIĞINDA
     window.addEventListener('load', function() {
-        // Versiyonu ekrana bas
         var versiyonDiv = document.createElement('div');
         versiyonDiv.style.position = 'fixed';
         versiyonDiv.style.bottom = '8px';
@@ -342,21 +380,17 @@
         versiyonDiv.innerText = 'KKL Fizik Admin - ' + VERSIYON;
         document.body.appendChild(versiyonDiv);
 
-        // Oturum kontrolü
         if (localStorage.getItem('admin_oturum') === 'acik') {
             panelAc();
         }
     });
 
-    // ENTER İLE GİRİŞ
     document.getElementById('pin-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') girisYap();
     });
 
     function girisYap() {
         var girilenPin = document.getElementById('pin-input').value;
-        
-        // 2 Öğretmen Kontrolü
         if (girilenPin === OGRETMEN_1_PIN || girilenPin === OGRETMEN_2_PIN) {
             localStorage.setItem('admin_oturum', 'acik');
             panelAc();
@@ -373,13 +407,12 @@
     }
 
     function cikisYap() {
-        if (confirm('Oturumu kapatmak istediğinize emin misiniz? Tekrar giriş yapmanız gerekecektir.')) {
+        if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
             localStorage.removeItem('admin_oturum');
             location.reload();
         }
     }
 
-    // VERİ ÇEKME
     async function verileriCek() {
         var result = await sb.from('fizik_takip').select('*');
         if (result.error) {
@@ -390,12 +423,9 @@
         panelGuncelle();
     }
 
-    // ŞUBE FİLTRELEME
     function subeFiltrele(sube, btn) {
         aktifSubeFiltre = sube;
-        document.querySelectorAll('.sube-buton').forEach(function(b) {
-            b.classList.remove('aktif');
-        });
+        document.querySelectorAll('.sube-buton').forEach(function(b) { b.classList.remove('aktif'); });
         btn.classList.add('aktif');
         panelGuncelle();
     }
@@ -505,13 +535,10 @@
         }
     }
 
-    // ÖĞRENCİ SİLME FONKSİYONU
     async function ogrenciSil(kod, event) {
         event.stopPropagation();
-
         if (confirm(kod + " kodlu öğrencinin TÜM kayıtları kalıcı olarak silinecek.\n\nEmin misiniz?")) {
             var result = await sb.from('fizik_takip').delete().eq('ogrenci_kodu', kod);
-            
             if (result.error) {
                 alert('Silme hatası: ' + result.error.message);
             } else {
@@ -521,11 +548,13 @@
         }
     }
 
-    // ÖĞRENCİ DETAY
+    // ÖĞRENCİ SEÇİMİ
     function ogrenciSec(kod, sube) {
         seciliOgrenciKodu = kod;
+        seciliOgrenciSubesi = sube;
         document.getElementById('secili-ogrenci-adi').textContent = '📊 ' + kod + ' (' + sube + ') - Detaylı Analiz';
         document.getElementById('ogrenci-detay').style.display = 'block';
+        document.getElementById('rapor-alani').style.display = 'none'; // Rapor alanını sıfırla
         document.getElementById('ogrenci-detay').scrollIntoView({ behavior: 'smooth' });
         ogrenciGrafigiCiz();
     }
@@ -534,6 +563,101 @@
         document.getElementById('ogrenci-detay').style.display = 'none';
     }
 
+    // ==========================================
+    // YENİ EKLENEN: YAPAY ZEKA RAPOR ANALİZİ
+    // ==========================================
+    function aiRaporuOlustur() {
+        if (!seciliOgrenciKodu) return;
+
+        // Öğrencinin verilerini filtrele
+        var ogrenciVerileri = tumVeriler.filter(v => v.ogrenci_kodu === seciliOgrenciKodu);
+        
+        if (ogrenciVerileri.length === 0) {
+            document.getElementById('rapor-metin').value = "Bu öğrenciye ait henüz veri bulunamadı.";
+            document.getElementById('rapor-alani').style.display = 'block';
+            return;
+        }
+
+        // Analiz Hesaplamaları
+        var toplamSoru = ogrenciVerileri.reduce((a, v) => a + (v.cozulen_soru || 0), 0);
+        var toplamSure = ogrenciVerileri.reduce((a, v) => a + (v.sure_dakika || 0), 0);
+        var toplamDogru = ogrenciVerileri.reduce((a, v) => a + (v.dogru_sayisi || 0), 0);
+        var toplamYanlis = ogrenciVerileri.reduce((a, v) => a + (v.yanlis_sayisi || 0), 0);
+        var netBasari = (toplamDogru + toplamYanlis) > 0 ? Math.round((toplamDogru / (toplamDogru + toplamYanlis)) * 100) : 0;
+
+        // En zayıf ve en güçlü konuyu bul (Basit analiz)
+        var konuIstatistikleri = {};
+        ogrenciVerileri.forEach(v => {
+            if (!konuIstatistikleri[v.konu]) konuIstatistikleri[v.konu] = { dogru: 0, yanlis: 0 };
+            konuIstatistikleri[v.konu].dogru += (v.dogru_sayisi || 0);
+            konuIstatistikleri[v.konu].yanlis += (v.yanlis_sayisi || 0);
+        });
+
+        var enZayifKonu = "";
+        var enDusukBasari = 101;
+        var enGucluKonu = "";
+        var enYuksekBasari = -1;
+
+        for (var konu in konuIstatistikleri) {
+            var k = konuIstatistikleri[konu];
+            var toplam = k.dogru + k.yanlis;
+            if (toplam > 0) {
+                var basari = (k.dogru / toplam) * 100;
+                if (basari < enDusukBasari) { enDusukBasari = basari; enZayifKonu = konu; }
+                if (basari > enYuksekBasari) { enYuksekBasari = basari; enGucluKonu = konu; }
+            }
+        }
+
+        // Rapor Metnini Oluştur
+        var bugun = new Date().toLocaleDateString('tr-TR');
+        var rapor = `Sayın ${seciliOgrenciKodu} (${seciliOgrenciSubesi}),\n\n`;
+        rapor += `Fizik çalışma verilerin ${bugun} tarihi itibarıyla analiz edilmiştir.\n\n`;
+        rapor += `📊 GENEL DURUM:\n`;
+        rapor += `Şu ana kadar toplam ${toplamSoru} soru çözdün ve ${toplamSure} dakika çalıştın.\n`;
+        rapor += `Genel başarı oranın %${netBasari}.\n\n`;
+
+        if (enZayifKonu) {
+            rapor += `⚠️ GELİŞTİRİLMESİ GEREKEN ALAN:\n`;
+            rapor += `"${enZayifKonu}" konusunda zorlandığını görüyorum. Bu konudaki başarı oranın %${Math.round(enDusukBasari)}.\n`;
+            rapor += `Öneri: Bu konuyla ilgili temel kavramları tekrar etmeli ve basit sorularla başlamalısın.\n\n`;
+        }
+
+        if (enGucluKonu) {
+            rapor += `🌟 GÜÇLÜ OLDUĞUN ALAN:\n`;
+            rapor += `"${enGucluKonu}" konusunda harikasın! Başarı oranın %${Math.round(enYuksekBasari)}.\n\n`;
+        }
+
+        rapor += `Unutma, fizik düzenli tekrar ve sabır ister. Çalışmaya devam!\n\n`;
+        rapor += `Fizik Öğretmenin`;
+
+        // Metni ekrana yaz ve alanı göster
+        document.getElementById('rapor-metin').value = rapor;
+        document.getElementById('rapor-alani').style.display = 'block';
+        document.getElementById('rapor-alani').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // RAPORU ÖĞRENCİYE GÖNDER
+    async function raporuOgrenciyeGonder() {
+        var metin = document.getElementById('rapor-metin').value;
+        if (!metin || metin.trim() === '') {
+            alert('Rapor boş olamaz!');
+            return;
+        }
+
+        var result = await sb.from('ogretmen_raporlari').insert([{
+            ogrenci_kodu: seciliOgrenciKodu,
+            rapor_metni: metin
+        }]);
+
+        if (result.error) {
+            alert('Gönderim hatası: ' + result.error.message);
+        } else {
+            alert('✅ Rapor öğrenciye başarıyla gönderildi!');
+            document.getElementById('rapor-alani').style.display = 'none';
+        }
+    }
+
+    // GRAFİK ÇİZİMİ
     function ogrenciGrafigiCiz() {
         var tip = document.getElementById('detay-sinav').value;
         var hedef = HEDEFLER[tip];
