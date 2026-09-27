@@ -7,307 +7,124 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* ŞİFRE EKRANI */
-        #ekran-sifre {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 90vh;
-        }
-        .sifre-kart {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid #334155;
-            width: 100%;
-            max-width: 400px;
-        }
-        .sifre-kart h2 { margin-bottom: 10px; font-size: 20px; }
-        .sifre-kart p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-        .sifre-kart input {
-            padding: 15px;
-            font-size: 28px;
-            text-align: center;
-            width: 160px;
-            border-radius: 8px;
-            border: 2px solid #475569;
-            background: #0f172a;
-            color: white;
-            margin-bottom: 20px;
-            outline: none;
-            letter-spacing: 8px;
-        }
-        .sifre-kart input:focus { border-color: #ef4444; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
-        .btn-kirmizi { background: #ef4444; color: white; }
-        .btn-gri { background: #475569; color: white; }
-        .btn-mor { background: #8b5cf6; color: white; }
-        .btn-yesil { background: #10b981; color: white; }
-
-        /* PANEL */
-        #ekran-panel { display: none; }
-        .baslik {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #ef4444;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-        .baslik h1 { color: #ef4444; font-size: 20px; }
-        .baslik-butonlar { display: flex; gap: 10px; }
-
-        /* ŞUBE FİLTRE ÇUBUĞU */
-        .filtre-cubugu {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .filtre-cubugu label { font-size: 14px; color: #94a3b8; font-weight: 600; }
-        .sube-buton {
-            padding: 10px 20px;
-            border: 2px solid #334155;
-            border-radius: 8px;
-            background: #1e293b;
-            color: #94a3b8;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .sube-buton:hover { border-color: #38bdf8; color: #38bdf8; }
-        .sube-buton.aktif { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-        /* ÖZET KARTLARI */
-        .ozet-kartlari { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
-        .ozet-kart {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            flex: 1;
-            min-width: 140px;
-            text-align: center;
-            border: 1px solid #334155;
-        }
-        .ozet-kart .sayi { font-size: 30px; font-weight: 800; color: #38bdf8; }
-        .ozet-kart .metin { color: #94a3b8; font-size: 13px; margin-top: 5px; }
-
-        /* ŞUBE KARŞILAŞTIRMA */
-        .karsilastirma {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border: 1px solid #334155;
-        }
-        .karsilastirma h3 { font-size: 16px; color: #f8fafc; margin-bottom: 15px; }
-        .karsilastirma-grid { display: flex; gap: 10px; flex-wrap: wrap; }
-        .sube-kart {
-            flex: 1;
-            min-width: 150px;
-            background: #0f172a;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #334155;
-        }
-        .sube-kart .sube-adi { font-size: 18px; font-weight: 700; color: #f59e0b; margin-bottom: 8px; }
-        .sube-kart .sube-veri { font-size: 13px; color: #94a3b8; margin: 3px 0; }
-        .sube-kart .sube-veri strong { color: #f8fafc; }
-
-        /* TABLO */
-        .tablo-baslik {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .tablo-baslik h3 { font-size: 16px; color: #f8fafc; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #1e293b;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 25px;
-        }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
-        th { background: #334155; color: #f8fafc; font-weight: 600; font-size: 13px; text-transform: uppercase; }
-        tr:hover { background: #334155; cursor: pointer; }
-        .basarili { color: #4ade80; font-weight: 700; }
-        .orta { color: #f59e0b; font-weight: 700; }
-        .basarisiz { color: #f87171; font-weight: 700; }
-        .sube-rozet {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .sube-12A { background: #dbeafe; color: #1e40af; }
-        .sube-12B { background: #dcfce7; color: #166534; }
-        .sube-12C { background: #fef3c7; color: #92400e; }
-        .sube-12F { background: #fce7f3; color: #9d174d; }
-
-        /* SİLME BUTONU */
-        .btn-sil {
-            background: #7f1d1d;
-            color: #fca5a5;
-            border: 1px solid #991b1b;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-sil:hover { background: #991b1b; color: white; }
-
-        /* ÖĞRENCİ DETAY */
-        .ogrenci-detay {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            display: none;
-            border: 1px solid #38bdf8;
-        }
-        .detay-baslik {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .detay-baslik h2 { font-size: 18px; color: #38bdf8; }
-        .detay-baslik select {
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: 2px solid #334155;
-            background: #0f172a;
-            color: #f8fafc;
-            font-size: 14px;
-        }
-        .grafik-kutu { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; height: 350px; }
-        .btn-kapat {
-            background: #475569;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        /* RAPOR ALANI */
-        .rapor-alani {
-            background: #0f172a;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            display: none; /* Başta gizli */
-        }
-        .rapor-alani h4 { color: #8b5cf6; margin-bottom: 10px; }
-        .rapor-textarea {
-            width: 100%;
-            height: 150px;
-            background: #1e293b;
-            color: #e2e8f0;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 10px;
-            font-family: inherit;
-            font-size: 14px;
-            resize: vertical;
-            margin-bottom: 10px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;color:#f8fafc;min-height:100vh;padding:20px}
+        #ekran-sifre{display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh}
+        .sifre-kart{background:#1e293b;padding:40px;border-radius:15px;text-align:center;border:1px solid #334155;width:100%;max-width:400px}
+        .sifre-kart h2{margin-bottom:10px;font-size:20px}
+        .sifre-kart p{color:#94a3b8;font-size:14px;margin-bottom:20px}
+        .sifre-kart input{padding:15px;font-size:28px;text-align:center;width:160px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;margin-bottom:20px;outline:none;letter-spacing:8px}
+        .sifre-kart input:focus{border-color:#ef4444}
+        .btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+        .btn-kirmizi{background:#ef4444;color:#fff}
+        .btn-gri{background:#475569;color:#fff}
+        .btn-mor{background:#8b5cf6;color:#fff}
+        .btn-yesil{background:#10b981;color:#fff}
+        .btn-mavi{background:#3b82f6;color:#fff}
+        #ekran-panel{display:none}
+        .baslik{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ef4444;padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+        .baslik h1{color:#ef4444;font-size:20px}
+        .baslik-butonlar{display:flex;gap:10px}
+        .filtre-cubugu{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+        .filtre-cubugu label{font-size:14px;color:#94a3b8;font-weight:600}
+        .sube-buton{padding:10px 20px;border:2px solid #334155;border-radius:8px;background:#1e293b;color:#94a3b8;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+        .sube-buton:hover{border-color:#38bdf8;color:#38bdf8}
+        .sube-buton.aktif{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+        .ozet-kartlari{display:flex;gap:12px;margin-bottom:25px;flex-wrap:wrap}
+        .ozet-kart{background:#1e293b;padding:20px;border-radius:12px;flex:1;min-width:140px;text-align:center;border:1px solid #334155}
+        .ozet-kart .sayi{font-size:30px;font-weight:800;color:#38bdf8}
+        .ozet-kart .metin{color:#94a3b8;font-size:13px;margin-top:5px}
+        .karsilastirma{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:25px;border:1px solid #334155}
+        .karsilastirma h3{font-size:16px;color:#f8fafc;margin-bottom:15px}
+        .karsilastirma-grid{display:flex;gap:10px;flex-wrap:wrap}
+        .sube-kart{flex:1;min-width:150px;background:#0f172a;border-radius:10px;padding:15px;text-align:center;border:1px solid #334155}
+        .sube-kart .sube-adi{font-size:18px;font-weight:700;color:#f59e0b;margin-bottom:8px}
+        .sube-kart .sube-veri{font-size:13px;color:#94a3b8;margin:3px 0}
+        .sube-kart .sube-veri strong{color:#f8fafc}
+        .tablo-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .tablo-baslik h3{font-size:16px;color:#f8fafc}
+        table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden;margin-bottom:25px}
+        th,td{padding:12px 15px;text-align:left;border-bottom:1px solid #334155;font-size:14px}
+        th{background:#334155;color:#f8fafc;font-weight:600;font-size:13px;text-transform:uppercase}
+        tr:hover{background:#334155;cursor:pointer}
+        .basarili{color:#4ade80;font-weight:700}
+        .orta{color:#f59e0b;font-weight:700}
+        .basarisiz{color:#f87171;font-weight:700}
+        .sube-rozet{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
+        .sube-12A{background:#dbeafe;color:#1e40af}
+        .sube-12B{background:#dcfce7;color:#166534}
+        .sube-12C{background:#fef3c7;color:#92400e}
+        .sube-12F{background:#fce7f3;color:#9d174d}
+        .btn-sil{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+        .btn-sil:hover{background:#991b1b;color:#fff}
+        .ogrenci-detay{background:#1e293b;padding:20px;border-radius:12px;margin-top:20px;display:none;border:1px solid #38bdf8}
+        .detay-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+        .detay-baslik h2{font-size:18px;color:#38bdf8}
+        .detay-baslik select{padding:8px 14px;border-radius:8px;border:2px solid #334155;background:#0f172a;color:#f8fafc;font-size:14px}
+        .grafik-kutu{background:#0f172a;padding:15px;border-radius:8px;margin-top:15px;height:350px}
+        .btn-kapat{background:#475569;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:10px}
+        .rapor-alani{background:#0f172a;border:1px solid #475569;border-radius:8px;padding:15px;margin-top:20px;display:none}
+        .rapor-alani h4{color:#8b5cf6;margin-bottom:10px}
+        .rapor-textarea{width:100%;height:200px;background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:10px;font-family:inherit;font-size:14px;resize:vertical;margin-bottom:10px;line-height:1.6}
+        .rapor-butonlar{display:flex;gap:10px;flex-wrap:wrap}
+        .yukleme{display:none;text-align:center;padding:20px;color:#8b5cf6;font-weight:600}
+        .yukleme-spinner{width:30px;height:30px;border:3px solid #334155;border-top-color:#8b5cf6;border-radius:50%;animation:donme .8s linear infinite;margin:0 auto 10px}
+        @keyframes donme{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
 
-    <!-- ŞİFRE EKRANI -->
     <div id="ekran-sifre">
         <div class="sifre-kart">
             <h2>Kandilli Kız Lisesi Fizik Bölümü</h2>
-            <p>Öğretmen Yönetim Paneli<br><small>(Oturum bu cihazda hatırlanacaktır)</small></p>
+            <p>Öğretmen Yönetim Paneli</p>
             <input type="password" id="pin-input" maxlength="4" autofocus>
             <br>
             <button class="btn btn-kirmizi" onclick="girisYap()">Giriş</button>
         </div>
     </div>
 
-    <!-- ANA KONTROL PANELİ -->
     <div id="ekran-panel">
-
         <div class="baslik">
             <h1>⚛️ Kandilli Kız Lisesi Fizik Kontrol Masası</h1>
             <div class="baslik-butonlar">
                 <button class="btn btn-gri" onclick="verileriCek()">🔄 Yenile</button>
-                <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış Yap</button>
+                <button class="btn btn-kirmizi" onclick="cikisYap()">🚪 Çıkış</button>
             </div>
         </div>
 
-        <!-- ŞUBE FİLTRE ÇUBUĞU -->
         <div class="filtre-cubugu">
-            <label>Şube Filtresi:</label>
-            <button class="sube-buton aktif" data-sube="TUMU" onclick="subeFiltrele('TUMU', this)">Tümü</button>
-            <button class="sube-buton" data-sube="12A" onclick="subeFiltrele('12A', this)">12-A</button>
-            <button class="sube-buton" data-sube="12B" onclick="subeFiltrele('12B', this)">12-B</button>
-            <button class="sube-buton" data-sube="12C" onclick="subeFiltrele('12C', this)">12-C</button>
-            <button class="sube-buton" data-sube="12F" onclick="subeFiltrele('12F', this)">12-F</button>
+            <label>Şube:</label>
+            <button class="sube-buton aktif" onclick="subeFiltrele('TUMU',this)">Tümü</button>
+            <button class="sube-buton" onclick="subeFiltrele('12A',this)">12-A</button>
+            <button class="sube-buton" onclick="subeFiltrele('12B',this)">12-B</button>
+            <button class="sube-buton" onclick="subeFiltrele('12C',this)">12-C</button>
+            <button class="sube-buton" onclick="subeFiltrele('12F',this)">12-F</button>
         </div>
 
-        <!-- ÖZET KARTLARI -->
         <div class="ozet-kartlari">
             <div class="ozet-kart"><div class="sayi" id="top-ogrenci">0</div><div class="metin">Aktif Öğrenci</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-kayit">0</div><div class="metin">Toplam Kayıt</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-soru">0</div><div class="metin">Çözülen Soru</div></div>
             <div class="ozet-kart"><div class="sayi" id="top-sure">0</div><div class="metin">Toplam Dakika</div></div>
-            <div class="ozet-kart"><div class="sayi" id="top-basari">%0</div><div class="metin">Ortalama Başarı</div></div>
+            <div class="ozet-kart"><div class="sayi" id="top-basari">%0</div><div class="metin">Ort. Başarı</div></div>
         </div>
 
-        <!-- ŞUBE KARŞILAŞTIRMA -->
         <div class="karsilastirma">
             <h3>📊 Şube Karşılaştırması</h3>
             <div class="karsilastirma-grid" id="sube-karsilastirma"></div>
         </div>
 
-        <!-- ÖĞRENCİ TABLOSU -->
         <div class="tablo-baslik">
-            <h3>Öğrenci Durum Tablosu <span style="color:#64748b; font-size:13px;">(Detay için satıra, silmek için butona tıklayın)</span></h3>
+            <h3>Öğrenci Tablosu <span style="color:#64748b;font-size:13px">(Detay: satıra tıkla | Sil: butona tıkla)</span></h3>
         </div>
         <table>
             <thead>
-                <tr>
-                    <th>Öğrenci Kodu</th>
-                    <th>Şube</th>
-                    <th>Kayıt</th>
-                    <th>Toplam Soru</th>
-                    <th>Toplam Süre</th>
-                    <th>Başarı %</th>
-                    <th>İşlem</th>
-                </tr>
+                <tr><th>Kod</th><th>Şube</th><th>Kayıt</th><th>Soru</th><th>Süre</th><th>Başarı</th><th>İşlem</th></tr>
             </thead>
             <tbody id="tablo-govde"></tbody>
         </table>
 
-        <!-- ÖĞRENCİ DETAY -->
         <div class="ogrenci-detay" id="ogrenci-detay">
             <div class="detay-baslik">
                 <h2 id="secili-ogrenci-adi"></h2>
@@ -319,406 +136,350 @@
                     <button class="btn-kapat" onclick="detayKapat()">✕ Kapat</button>
                 </div>
             </div>
-            
-            <!-- YENİ EKLENEN: AI RAPOR BUTONU -->
-            <div style="margin-bottom: 15px;">
-                <button class="btn btn-mor" onclick="aiRaporuOlustur()">🤖 Yapay Zeka Gelişim Raporu Oluştur</button>
+
+            <div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-mor" id="btn-ai" onclick="aiRaporuOlustur()">🤖 Yapay Zeka Raporu Oluştur</button>
+            </div>
+
+            <div class="yukleme" id="ai-yukleme">
+                <div class="yukleme-spinner"></div>
+                Yapay zeka öğrenci verilerini analiz ediyor...
             </div>
 
             <div class="grafik-kutu"><canvas id="grafik-detay"></canvas></div>
 
-            <!-- RAPOR YAZMA VE GÖNDERME ALANI -->
             <div class="rapor-alani" id="rapor-alani">
-                <h4>📝 Gelişim Raporu Taslağı (Düzenleyip Gönderebilirsiniz)</h4>
-                <textarea id="rapor-metin" class="rapor-textarea" placeholder="Rapor burada oluşacak..."></textarea>
-                <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()">📤 Öğrenciye Gönder</button>
+                <h4>📝 Gelişim Raporu (Düzenleyip Gönderebilirsiniz)</h4>
+                <textarea id="rapor-metin" class="rapor-textarea"></textarea>
+                <div class="rapor-butonlar">
+                    <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()">📤 Öğrenciye Gönder</button>
+                    <button class="btn btn-mavi" onclick="raporuKopyala()">📋 Kopyala</button>
+                </div>
             </div>
         </div>
-
     </div>
 
     <script>
-    // VERSİYON KODU
-    var VERSIYON = "v1.2.0"; // AI Rapor özelliği eklendi
+    var VERSIYON="v2.1.0";
+    var OGRETMEN_1_PIN="1234";
+    var OGRETMEN_2_PIN="5678";
 
-    // ÖĞRETMEN ŞİFRELERİ
-    var OGRETMEN_1_PIN = "1044";
-    var OGRETMEN_2_PIN = "2133";
+    var SB_URL='https://qatthkcayytafdhiogyp.supabase.co';
+    var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
+    var sb=supabase.createClient(SB_URL,SB_KEY);
 
-    // SUPABASE BAĞLANTISI
-    var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
-    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
-    var sb = supabase.createClient(SB_URL, SB_KEY);
+    // ==========================================
+    // GEMINI API ANAHTARI - KODDA YOK!
+    // Supabase'deki api_keys tablosundan çekilir.
+    // ==========================================
+    var GEMINI_API_KEY='';
 
-    // KONULAR
-    var HEDEFLER = {
-        TYT: {
-            konular: ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "İş, Güç ve Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik Akımı", "Basınç", "Optik", "Dalgalar"]
-        },
-        AYT: {
-            konular: ["Vektörler ve Kuvvet", "Bağıl Hareket", "Newton Hareket Yasaları", "Çember Hareketi", "Basit Harmonik Hareket", "İş ve Enerji", "İtme ve Momentum", "Tork ve Denge", "Elektrik Alan", "Manyetik Alan", "Alternatif Akım", "Modern Fizik", "Atom ve Nükleer Fizik"]
-        }
-    };
-
-    var SUBELER = ['12A', '12B', '12C', '12F'];
-    var tumVeriler = [];
-    var aktifSubeFiltre = 'TUMU';
-    var seciliOgrenciKodu = '';
-    var seciliOgrenciSubesi = '';
-    var chartDetay = null;
-
-    // SAYFA AÇILDIĞINDA
-    window.addEventListener('load', function() {
-        var versiyonDiv = document.createElement('div');
-        versiyonDiv.style.position = 'fixed';
-        versiyonDiv.style.bottom = '8px';
-        versiyonDiv.style.right = '12px';
-        versiyonDiv.style.fontSize = '10px';
-        versiyonDiv.style.color = '#475569';
-        versiyonDiv.style.opacity = '0.8';
-        versiyonDiv.style.pointerEvents = 'none';
-        versiyonDiv.innerText = 'KKL Fizik Admin - ' + VERSIYON;
-        document.body.appendChild(versiyonDiv);
-
-        if (localStorage.getItem('admin_oturum') === 'acik') {
-            panelAc();
-        }
-    });
-
-    document.getElementById('pin-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') girisYap();
-    });
-
-    function girisYap() {
-        var girilenPin = document.getElementById('pin-input').value;
-        if (girilenPin === OGRETMEN_1_PIN || girilenPin === OGRETMEN_2_PIN) {
-            localStorage.setItem('admin_oturum', 'acik');
-            panelAc();
-        } else {
-            alert('Hatalı PIN kodu!');
-            document.getElementById('pin-input').value = '';
+    async function geminiAnahtariGetir(){
+        var result=await sb
+            .from('api_keys')
+            .select('api_anahtari')
+            .eq('servis_adi','gemini')
+            .single();
+        if(result.data&&result.data.api_anahtari){
+            GEMINI_API_KEY=result.data.api_anahtari;
+            console.log('Gemini API anahtarı Supabase\'den yüklendi.');
+        }else{
+            console.warn('Gemini API anahtarı Supabase\'de bulunamadı.');
         }
     }
 
-    function panelAc() {
-        document.getElementById('ekran-sifre').style.display = 'none';
-        document.getElementById('ekran-panel').style.display = 'block';
+    var HEDEFLER={
+        TYT:{konular:["Fizik Bilimine Giriş","Madde ve Özellikleri","Hareket ve Kuvvet","İş, Güç ve Enerji","Isı ve Sıcaklık","Elektrostatik","Elektrik Akımı","Basınç","Optik","Dalgalar"]},
+        AYT:{konular:["Vektörler ve Kuvvet","Bağıl Hareket","Newton Hareket Yasaları","Çember Hareketi","Basit Harmonik Hareket","İş ve Enerji","İtme ve Momentum","Tork ve Denge","Elektrik Alan","Manyetik Alan","Alternatif Akım","Modern Fizik","Atom ve Nükleer Fizik"]}
+    };
+
+    var SUBELER=['12A','12B','12C','12F'];
+    var tumVeriler=[];
+    var aktifSubeFiltre='TUMU';
+    var seciliOgrenciKodu='';
+    var seciliOgrenciSubesi='';
+    var chartDetay=null;
+
+    window.addEventListener('load',function(){
+        var v=document.createElement('div');
+        v.style.cssText='position:fixed;bottom:8px;right:12px;font-size:10px;color:#475569;opacity:.8;pointer-events:none';
+        v.innerText='KKL Fizik Admin - '+VERSIYON;
+        document.body.appendChild(v);
+        if(localStorage.getItem('admin_oturum')==='acik'){panelAc()}
+    });
+
+    document.getElementById('pin-input').addEventListener('keypress',function(e){if(e.key==='Enter')girisYap()});
+
+    function girisYap(){
+        var p=document.getElementById('pin-input').value;
+        if(p===OGRETMEN_1_PIN||p===OGRETMEN_2_PIN){
+            localStorage.setItem('admin_oturum','acik');
+            panelAc();
+        }else{
+            alert('Hatalı PIN kodu!');
+            document.getElementById('pin-input').value='';
+        }
+    }
+
+    async function panelAc(){
+        document.getElementById('ekran-sifre').style.display='none';
+        document.getElementById('ekran-panel').style.display='block';
+        await geminiAnahtariGetir();
         verileriCek();
     }
 
-    function cikisYap() {
-        if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
+    function cikisYap(){
+        if(confirm('Oturumu kapatmak istediğinize emin misiniz?')){
             localStorage.removeItem('admin_oturum');
             location.reload();
         }
     }
 
-    async function verileriCek() {
-        var result = await sb.from('fizik_takip').select('*');
-        if (result.error) {
-            alert('Veri çekilemedi: ' + result.error.message);
-            return;
-        }
-        tumVeriler = result.data || [];
+    async function verileriCek(){
+        var r=await sb.from('fizik_takip').select('*');
+        if(r.error){alert('Veri çekilemedi: '+r.error.message);return}
+        tumVeriler=r.data||[];
         panelGuncelle();
     }
 
-    function subeFiltrele(sube, btn) {
-        aktifSubeFiltre = sube;
-        document.querySelectorAll('.sube-buton').forEach(function(b) { b.classList.remove('aktif'); });
+    function subeFiltrele(sube,btn){
+        aktifSubeFiltre=sube;
+        document.querySelectorAll('.sube-buton').forEach(function(b){b.classList.remove('aktif')});
         btn.classList.add('aktif');
         panelGuncelle();
     }
 
-    function filtreliVerileriAl() {
-        if (aktifSubeFiltre === 'TUMU') return tumVeriler;
-        return tumVeriler.filter(function(v) { return v.sube === aktifSubeFiltre; });
+    function filtreliVerileriAl(){
+        if(aktifSubeFiltre==='TUMU')return tumVeriler;
+        return tumVeriler.filter(function(v){return v.sube===aktifSubeFiltre});
     }
 
-    function panelGuncelle() {
-        var veriler = filtreliVerileriAl();
+    function panelGuncelle(){
+        var veriler=filtreliVerileriAl();
         ogrencileriHesapla(veriler);
         subeKarsilastirmaCiz();
         tabloyuDoldur(veriler);
     }
 
-    function ogrencileriHesapla(veriler) {
-        var toplamDogru = 0;
-        var toplamYanlis = 0;
-        var ogrenciler = new Set();
-
-        veriler.forEach(function(v) {
-            ogrenciler.add(v.ogrenci_kodu);
-            toplamDogru += (v.dogru_sayisi || 0);
-            toplamYanlis += (v.yanlis_sayisi || 0);
-        });
-
-        var toplamSoru = veriler.reduce(function(a, v) { return a + (v.cozulen_soru || 0); }, 0);
-        var toplamSure = veriler.reduce(function(a, v) { return a + (v.sure_dakika || 0); }, 0);
-        var toplamCozulen = toplamDogru + toplamYanlis;
-        var basari = toplamCozulen > 0 ? Math.round((toplamDogru / toplamCozulen) * 100) : 0;
-
-        document.getElementById('top-ogrenci').textContent = ogrenciler.size;
-        document.getElementById('top-kayit').textContent = veriler.length;
-        document.getElementById('top-soru').textContent = toplamSoru;
-        document.getElementById('top-sure').textContent = toplamSure;
-        document.getElementById('top-basari').textContent = '%' + basari;
+    function ogrencileriHesapla(veriler){
+        var td=0,ty=0,ogrenciler=new Set();
+        veriler.forEach(function(v){ogrenciler.add(v.ogrenci_kodu);td+=(v.dogru_sayisi||0);ty+=(v.yanlis_sayisi||0)});
+        var ts=veriler.reduce(function(a,v){return a+(v.cozulen_soru||0)},0);
+        var tu=veriler.reduce(function(a,v){return a+(v.sure_dakika||0)},0);
+        var tc=td+ty;
+        var b=tc>0?Math.round((td/tc)*100):0;
+        document.getElementById('top-ogrenci').textContent=ogrenciler.size;
+        document.getElementById('top-kayit').textContent=veriler.length;
+        document.getElementById('top-soru').textContent=ts;
+        document.getElementById('top-sure').textContent=tu;
+        document.getElementById('top-basari').textContent='%'+b;
     }
 
-    function subeKarsilastirmaCiz() {
-        var container = document.getElementById('sube-karsilastirma');
-        container.innerHTML = '';
-
-        SUBELER.forEach(function(sube) {
-            var subeVerileri = tumVeriler.filter(function(v) { return v.sube === sube; });
-            var ogrenciSayisi = new Set(subeVerileri.map(function(v) { return v.ogrenci_kodu; })).size;
-            var toplamSoru = subeVerileri.reduce(function(a, v) { return a + (v.cozulen_soru || 0); }, 0);
-            var toplamSure = subeVerileri.reduce(function(a, v) { return a + (v.sure_dakika || 0); }, 0);
-            var toplamDogru = subeVerileri.reduce(function(a, v) { return a + (v.dogru_sayisi || 0); }, 0);
-            var toplamYanlis = subeVerileri.reduce(function(a, v) { return a + (v.yanlis_sayisi || 0); }, 0);
-            var cozulen = toplamDogru + toplamYanlis;
-            var basari = cozulen > 0 ? Math.round((toplamDogru / cozulen) * 100) : 0;
-
-            var kart = document.createElement('div');
-            kart.className = 'sube-kart';
-            kart.innerHTML = '<div class="sube-adi">' + sube + '</div>' +
-                '<div class="sube-veri">Öğrenci: <strong>' + ogrenciSayisi + '</strong></div>' +
-                '<div class="sube-veri">Soru: <strong>' + toplamSoru + '</strong></div>' +
-                '<div class="sube-veri">Süre: <strong>' + toplamSure + ' dk</strong></div>' +
-                '<div class="sube-veri">Başarı: <strong class="' + (basari >= 60 ? 'basarili' : basari >= 40 ? 'orta' : 'basarisiz') + '">% ' + basari + '</strong></div>';
-            container.appendChild(kart);
+    function subeKarsilastirmaCiz(){
+        var c=document.getElementById('sube-karsilastirma');c.innerHTML='';
+        SUBELER.forEach(function(sube){
+            var sv=tumVeriler.filter(function(v){return v.sube===sube});
+            var os=new Set(sv.map(function(v){return v.ogrenci_kodu})).size;
+            var ts=sv.reduce(function(a,v){return a+(v.cozulen_soru||0)},0);
+            var tu=sv.reduce(function(a,v){return a+(v.sure_dakika||0)},0);
+            var td=sv.reduce(function(a,v){return a+(v.dogru_sayisi||0)},0);
+            var ty=sv.reduce(function(a,v){return a+(v.yanlis_sayisi||0)},0);
+            var coz=td+ty;var b=coz>0?Math.round((td/coz)*100):0;
+            var k=document.createElement('div');k.className='sube-kart';
+            k.innerHTML='<div class="sube-adi">'+sube+'</div>'+
+                '<div class="sube-veri">Öğrenci: <strong>'+os+'</strong></div>'+
+                '<div class="sube-veri">Soru: <strong>'+ts+'</strong></div>'+
+                '<div class="sube-veri">Süre: <strong>'+tu+' dk</strong></div>'+
+                '<div class="sube-veri">Başarı: <strong class="'+(b>=60?'basarili':b>=40?'orta':'basarisiz')+'">%'+b+'</strong></div>';
+            c.appendChild(k);
         });
     }
 
-    function tabloyuDoldur(veriler) {
-        var ogrenciler = {};
-        veriler.forEach(function(v) {
-            if (!ogrenciler[v.ogrenci_kodu]) {
-                ogrenciler[v.ogrenci_kodu] = { sube: v.sube || '-', kayit: 0, soru: 0, sure: 0, dogru: 0, yanlis: 0 };
-            }
+    function tabloyuDoldur(veriler){
+        var ogrenciler={};
+        veriler.forEach(function(v){
+            if(!ogrenciler[v.ogrenci_kodu])ogrenciler[v.ogrenci_kodu]={sube:v.sube||'-',kayit:0,soru:0,sure:0,dogru:0,yanlis:0};
             ogrenciler[v.ogrenci_kodu].kayit++;
-            ogrenciler[v.ogrenci_kodu].soru += (v.cozulen_soru || 0);
-            ogrenciler[v.ogrenci_kodu].sure += (v.sure_dakika || 0);
-            ogrenciler[v.ogrenci_kodu].dogru += (v.dogru_sayisi || 0);
-            ogrenciler[v.ogrenci_kodu].yanlis += (v.yanlis_sayisi || 0);
+            ogrenciler[v.ogrenci_kodu].soru+=(v.cozulen_soru||0);
+            ogrenciler[v.ogrenci_kodu].sure+=(v.sure_dakika||0);
+            ogrenciler[v.ogrenci_kodu].dogru+=(v.dogru_sayisi||0);
+            ogrenciler[v.ogrenci_kodu].yanlis+=(v.yanlis_sayisi||0);
         });
-
-        var govde = document.getElementById('tablo-govde');
-        govde.innerHTML = '';
-
-        var siraliOgrenciler = Object.keys(ogrenciler).sort(function(a, b) {
-            return ogrenciler[b].soru - ogrenciler[a].soru;
-        });
-
-        siraliOgrenciler.forEach(function(kod) {
-            var o = ogrenciler[kod];
-            var cozulen = o.dogru + o.yanlis;
-            var basari = cozulen > 0 ? Math.round((o.dogru / cozulen) * 100) : 0;
-            var basariSinif = basari >= 60 ? 'basarili' : basari >= 40 ? 'orta' : 'basarisiz';
-
-            var tr = document.createElement('tr');
-            tr.onclick = function() { ogrenciSec(kod, o.sube); };
-            
-            tr.innerHTML = '<td><strong>' + kod + '</strong></td>' +
-                '<td><span class="sube-rozet sube-' + o.sube + '">' + o.sube + '</span></td>' +
-                '<td>' + o.kayit + '</td>' +
-                '<td>' + o.soru + '</td>' +
-                '<td>' + o.sure + ' dk</td>' +
-                '<td class="' + basariSinif + '">% ' + basari + '</td>' +
-                '<td><button class="btn-sil" onclick="ogrenciSil(\'' + kod + '\', event)">🗑️ Sil</button></td>';
-            
+        var govde=document.getElementById('tablo-govde');govde.innerHTML='';
+        var sirali=Object.keys(ogrenciler).sort(function(a,b){return ogrenciler[b].soru-ogrenciler[a].soru});
+        sirali.forEach(function(kod){
+            var o=ogrenciler[kod];
+            var coz=o.dogru+o.yanlis;
+            var b=coz>0?Math.round((o.dogru/coz)*100):0;
+            var bs=b>=60?'basarili':b>=40?'orta':'basarisiz';
+            var tr=document.createElement('tr');
+            tr.onclick=function(){ogrenciSec(kod,o.sube)};
+            tr.innerHTML='<td><strong>'+kod+'</strong></td>'+
+                '<td><span class="sube-rozet sube-'+o.sube+'">'+o.sube+'</span></td>'+
+                '<td>'+o.kayit+'</td><td>'+o.soru+'</td><td>'+o.sure+' dk</td>'+
+                '<td class="'+bs+'">%'+b+'</td>'+
+                '<td><button class="btn-sil" onclick="ogrenciSil(\''+kod+'\',event)">🗑️ Sil</button></td>';
             govde.appendChild(tr);
         });
-
-        if (siraliOgrenciler.length === 0) {
-            govde.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b; padding:30px;">Bu filtreye uygun kayıt bulunamadı.</td></tr>';
-        }
+        if(sirali.length===0)govde.innerHTML='<tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px">Kayıt bulunamadı.</td></tr>';
     }
 
-    async function ogrenciSil(kod, event) {
+    async function ogrenciSil(kod,event){
         event.stopPropagation();
-        if (confirm(kod + " kodlu öğrencinin TÜM kayıtları kalıcı olarak silinecek.\n\nEmin misiniz?")) {
-            var result = await sb.from('fizik_takip').delete().eq('ogrenci_kodu', kod);
-            if (result.error) {
-                alert('Silme hatası: ' + result.error.message);
-            } else {
-                alert(kod + ' başarıyla silindi.');
-                verileriCek();
-            }
+        if(confirm(kod+" kodlu öğrencinin TÜM kayıtları silinecek. Emin misiniz?")){
+            var r=await sb.from('fizik_takip').delete().eq('ogrenci_kodu',kod);
+            if(r.error)alert('Silme hatası: '+r.error.message);
+            else{alert(kod+' silindi.');verileriCek()}
         }
     }
 
-    // ÖĞRENCİ SEÇİMİ
-    function ogrenciSec(kod, sube) {
-        seciliOgrenciKodu = kod;
-        seciliOgrenciSubesi = sube;
-        document.getElementById('secili-ogrenci-adi').textContent = '📊 ' + kod + ' (' + sube + ') - Detaylı Analiz';
-        document.getElementById('ogrenci-detay').style.display = 'block';
-        document.getElementById('rapor-alani').style.display = 'none'; // Rapor alanını sıfırla
-        document.getElementById('ogrenci-detay').scrollIntoView({ behavior: 'smooth' });
+    function ogrenciSec(kod,sube){
+        seciliOgrenciKodu=kod;seciliOgrenciSubesi=sube;
+        document.getElementById('secili-ogrenci-adi').textContent='📊 '+kod+' ('+sube+')';
+        document.getElementById('ogrenci-detay').style.display='block';
+        document.getElementById('rapor-alani').style.display='none';
+        document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
         ogrenciGrafigiCiz();
     }
 
-    function detayKapat() {
-        document.getElementById('ogrenci-detay').style.display = 'none';
-    }
+    function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
 
     // ==========================================
-    // YENİ EKLENEN: YAPAY ZEKA RAPOR ANALİZİ
+    // GERÇEK YAPAY ZEKA - GEMINI API
+    // Anahtar Supabase'den gelir, kodda yazmaz.
     // ==========================================
-    function aiRaporuOlustur() {
-        if (!seciliOgrenciKodu) return;
+    async function aiRaporuOlustur(){
+        if(!seciliOgrenciKodu)return;
 
-        // Öğrencinin verilerini filtrele
-        var ogrenciVerileri = tumVeriler.filter(v => v.ogrenci_kodu === seciliOgrenciKodu);
-        
-        if (ogrenciVerileri.length === 0) {
-            document.getElementById('rapor-metin').value = "Bu öğrenciye ait henüz veri bulunamadı.";
-            document.getElementById('rapor-alani').style.display = 'block';
+        if(!GEMINI_API_KEY){
+            await geminiAnahtariGetir();
+        }
+        if(!GEMINI_API_KEY){
+            alert('Gemini API anahtarı Supabase\'den alınamadı.\n\nLütfen Supabase panelindeki api_keys tablosunu kontrol edin.');
             return;
         }
 
-        // Analiz Hesaplamaları
-        var toplamSoru = ogrenciVerileri.reduce((a, v) => a + (v.cozulen_soru || 0), 0);
-        var toplamSure = ogrenciVerileri.reduce((a, v) => a + (v.sure_dakika || 0), 0);
-        var toplamDogru = ogrenciVerileri.reduce((a, v) => a + (v.dogru_sayisi || 0), 0);
-        var toplamYanlis = ogrenciVerileri.reduce((a, v) => a + (v.yanlis_sayisi || 0), 0);
-        var netBasari = (toplamDogru + toplamYanlis) > 0 ? Math.round((toplamDogru / (toplamDogru + toplamYanlis)) * 100) : 0;
+        var ogrenciVerileri=tumVeriler.filter(function(v){return v.ogrenci_kodu===seciliOgrenciKodu});
+        if(ogrenciVerileri.length===0){alert('Bu öğrenciye ait veri bulunamadı.');return}
 
-        // En zayıf ve en güçlü konuyu bul (Basit analiz)
-        var konuIstatistikleri = {};
-        ogrenciVerileri.forEach(v => {
-            if (!konuIstatistikleri[v.konu]) konuIstatistikleri[v.konu] = { dogru: 0, yanlis: 0 };
-            konuIstatistikleri[v.konu].dogru += (v.dogru_sayisi || 0);
-            konuIstatistikleri[v.konu].yanlis += (v.yanlis_sayisi || 0);
+        var buton=document.getElementById('btn-ai');
+        var yukleme=document.getElementById('ai-yukleme');
+        buton.disabled=true;buton.innerText='⏳ Analiz Ediliyor...';
+        yukleme.style.display='block';
+
+        var toplamSoru=ogrenciVerileri.reduce(function(a,v){return a+(v.cozulen_soru||0)},0);
+        var toplamSure=ogrenciVerileri.reduce(function(a,v){return a+(v.sure_dakika||0)},0);
+        var toplamDogru=ogrenciVerileri.reduce(function(a,v){return a+(v.dogru_sayisi||0)},0);
+        var toplamYanlis=ogrenciVerileri.reduce(function(a,v){return a+(v.yanlis_sayisi||0)},0);
+        var genelBasari=(toplamDogru+toplamYanlis)>0?Math.round((toplamDogru/(toplamDogru+toplamYanlis))*100):0;
+
+        var konuDetaylari={};
+        ogrenciVerileri.forEach(function(v){
+            if(!konuDetaylari[v.konu])konuDetaylari[v.konu]={dogru:0,yanlis:0,soru:0,sure:0,ozguven:[]};
+            konuDetaylari[v.konu].dogru+=(v.dogru_sayisi||0);
+            konuDetaylari[v.konu].yanlis+=(v.yanlis_sayisi||0);
+            konuDetaylari[v.konu].soru+=(v.cozulen_soru||0);
+            konuDetaylari[v.konu].sure+=(v.sure_dakika||0);
+            if(v.ozguven)konuDetaylari[v.konu].ozguven.push(v.ozguven);
         });
 
-        var enZayifKonu = "";
-        var enDusukBasari = 101;
-        var enGucluKonu = "";
-        var enYuksekBasari = -1;
+        var konuMetni='';
+        for(var konu in konuDetaylari){
+            var k=konuDetaylari[konu];
+            var toplam=k.dogru+k.yanlis;
+            var basari=toplam>0?Math.round((k.dogru/toplam)*100):0;
+            var ortOzguven=k.ozguven.length>0?(k.ozguven.reduce(function(a,b){return a+b},0)/k.ozguven.length).toFixed(1):'N/A';
+            konuMetni+='Konu: '+konu+' | Çözülen: '+k.soru+' | Doğru: '+k.dogru+' | Yanlış: '+k.yanlis+' | Başarı: %'+basari+' | Süre: '+k.sure+'dk | Anlama: '+ortOzguven+'/5\n';
+        }
 
-        for (var konu in konuIstatistikleri) {
-            var k = konuIstatistikleri[konu];
-            var toplam = k.dogru + k.yanlis;
-            if (toplam > 0) {
-                var basari = (k.dogru / toplam) * 100;
-                if (basari < enDusukBasari) { enDusukBasari = basari; enZayifKonu = konu; }
-                if (basari > enYuksekBasari) { enYuksekBasari = basari; enGucluKonu = konu; }
+        var prompt='Sen Kandilli Kız Lisesi\'nde görev yapan deneyimli ve şefkatli bir Fizik öğretmenisin. '+
+            'Aşağıda 12. sınıf öğrencisinin fizik çalışma verileri var. Bu verileri derinlemesine analiz et.\n\n'+
+            'ÖĞRENCİ KODU: '+seciliOgrenciKodu+' | ŞUBE: '+seciliOgrenciSubesi+'\n'+
+            'GENEL: '+toplamSoru+' soru, '+toplamSure+' dk çalışma, %'+genelBasari+' genel başarı\n\n'+
+            'KONU BAZLI DETAYLAR:\n'+konuMetni+'\n\n'+
+            'LÜTFEN ŞU YAPIDA BİR RAPOR YAZ:\n'+
+            '1. 🌟 GÜÇLÜ YÖNLER: En başarılı olduğu 2-3 konuyu belirt ve takdir et.\n'+
+            '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver (örn: "Çember hareketinde serbest cisim diyagramı çiz", "Manyetik alanda sağ el kuralını 3 boyutlu düşün").\n'+
+            '3. 📈 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
+            '4. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
+            'Raporu doğrudan öğrenciye hitaben yaz. "Sayın '+seciliOgrenciKodu+'" diye başla. '+
+            'Fizik terminolojisini doğru kullan. Samimi ama profesyonel bir öğretmen tonu kullan. '+
+            'Raporun sonuna "Fizik Öğretmenin" yaz.';
+
+        try{
+            var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_API_KEY;
+            var response=await fetch(url,{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+            });
+            var data=await response.json();
+            if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]){
+                var aiCevabi=data.candidates[0].content.parts[0].text;
+                document.getElementById('rapor-metin').value=aiCevabi;
+                document.getElementById('rapor-alani').style.display='block';
+                document.getElementById('rapor-alani').scrollIntoView({behavior:'smooth'});
+            }else{
+                alert('Yapay zekadan cevap alınamadı. API kotası dolmuş olabilir.');
+                console.log('API Yanıtı:',data);
             }
+        }catch(hata){
+            alert('Bağlantı hatası: '+hata.message);
+            console.error(hata);
+        }finally{
+            buton.disabled=false;buton.innerText='🤖 Yapay Zeka Raporu Oluştur';
+            yukleme.style.display='none';
         }
-
-        // Rapor Metnini Oluştur
-        var bugun = new Date().toLocaleDateString('tr-TR');
-        var rapor = `Sayın ${seciliOgrenciKodu} (${seciliOgrenciSubesi}),\n\n`;
-        rapor += `Fizik çalışma verilerin ${bugun} tarihi itibarıyla analiz edilmiştir.\n\n`;
-        rapor += `📊 GENEL DURUM:\n`;
-        rapor += `Şu ana kadar toplam ${toplamSoru} soru çözdün ve ${toplamSure} dakika çalıştın.\n`;
-        rapor += `Genel başarı oranın %${netBasari}.\n\n`;
-
-        if (enZayifKonu) {
-            rapor += `⚠️ GELİŞTİRİLMESİ GEREKEN ALAN:\n`;
-            rapor += `"${enZayifKonu}" konusunda zorlandığını görüyorum. Bu konudaki başarı oranın %${Math.round(enDusukBasari)}.\n`;
-            rapor += `Öneri: Bu konuyla ilgili temel kavramları tekrar etmeli ve basit sorularla başlamalısın.\n\n`;
-        }
-
-        if (enGucluKonu) {
-            rapor += `🌟 GÜÇLÜ OLDUĞUN ALAN:\n`;
-            rapor += `"${enGucluKonu}" konusunda harikasın! Başarı oranın %${Math.round(enYuksekBasari)}.\n\n`;
-        }
-
-        rapor += `Unutma, fizik düzenli tekrar ve sabır ister. Çalışmaya devam!\n\n`;
-        rapor += `Fizik Öğretmenin`;
-
-        // Metni ekrana yaz ve alanı göster
-        document.getElementById('rapor-metin').value = rapor;
-        document.getElementById('rapor-alani').style.display = 'block';
-        document.getElementById('rapor-alani').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // RAPORU ÖĞRENCİYE GÖNDER
-    async function raporuOgrenciyeGonder() {
-        var metin = document.getElementById('rapor-metin').value;
-        if (!metin || metin.trim() === '') {
-            alert('Rapor boş olamaz!');
-            return;
-        }
+    function raporuKopyala(){
+        var metin=document.getElementById('rapor-metin').value;
+        if(!metin){alert('Önce rapor oluşturun.');return}
+        navigator.clipboard.writeText(metin).then(function(){alert('Rapor panoya kopyalandı.')});
+    }
 
-        var result = await sb.from('ogretmen_raporlari').insert([{
-            ogrenci_kodu: seciliOgrenciKodu,
-            rapor_metni: metin
+    async function raporuOgrenciyeGonder(){
+        var metin=document.getElementById('rapor-metin').value;
+        if(!metin||metin.trim()===''){alert('Rapor boş olamaz!');return}
+
+        await sb.from('ogretmen_raporlari').delete().eq('ogrenci_kodu',seciliOgrenciKodu);
+
+        var r=await sb.from('ogretmen_raporlari').insert([{
+            ogrenci_kodu:seciliOgrenciKodu,
+            rapor_metni:metin
         }]);
 
-        if (result.error) {
-            alert('Gönderim hatası: ' + result.error.message);
-        } else {
-            alert('✅ Rapor öğrenciye başarıyla gönderildi!');
-            document.getElementById('rapor-alani').style.display = 'none';
+        if(r.error)alert('Gönderim hatası: '+r.error.message);
+        else{
+            alert('✅ Rapor '+seciliOgrenciKodu+' kodlu öğrenciye gönderildi!');
+            document.getElementById('rapor-alani').style.display='none';
         }
     }
 
-    // GRAFİK ÇİZİMİ
-    function ogrenciGrafigiCiz() {
-        var tip = document.getElementById('detay-sinav').value;
-        var hedef = HEDEFLER[tip];
-        var toplamSoru = new Array(hedef.konular.length).fill(0);
-        var toplamSure = new Array(hedef.konular.length).fill(0);
-
-        tumVeriler.forEach(function(v) {
-            if (v.ogrenci_kodu === seciliOgrenciKodu && v.sinav_tipi === tip) {
-                var idx = hedef.konular.indexOf(v.konu);
-                if (idx !== -1) {
-                    toplamSoru[idx] += (v.cozulen_soru || 0);
-                    toplamSure[idx] += (v.sure_dakika || 0);
-                }
+    function ogrenciGrafigiCiz(){
+        var tip=document.getElementById('detay-sinav').value;
+        var hedef=HEDEFLER[tip];
+        var tSoru=new Array(hedef.konular.length).fill(0);
+        var tSure=new Array(hedef.konular.length).fill(0);
+        tumVeriler.forEach(function(v){
+            if(v.ogrenci_kodu===seciliOgrenciKodu&&v.sinav_tipi===tip){
+                var idx=hedef.konular.indexOf(v.konu);
+                if(idx!==-1){tSoru[idx]+=(v.cozulen_soru||0);tSure[idx]+=(v.sure_dakika||0)}
             }
         });
-
-        if (chartDetay) chartDetay.destroy();
-        chartDetay = new Chart(document.getElementById('grafik-detay'), {
-            type: 'bar',
-            data: {
-                labels: hedef.konular,
-                datasets: [
-                    {
-                        label: 'Çözülen Soru',
-                        data: toplamSoru,
-                        backgroundColor: '#38bdf8',
-                        borderRadius: 6,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Çalışma Süresi (dk)',
-                        data: toplamSure,
-                        backgroundColor: 'rgba(245, 158, 11, 0.6)',
-                        borderRadius: 6,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top', labels: { color: '#f8fafc' } } },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: { display: true, text: 'Soru Sayısı', color: '#38bdf8' },
-                        ticks: { color: '#94a3b8' },
-                        grid: { color: '#334155' }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: { display: true, text: 'Süre (dk)', color: '#f59e0b' },
-                        ticks: { color: '#94a3b8' },
-                        grid: { drawOnChartArea: false }
-                    },
-                    x: {
-                        ticks: { maxRotation: 45, minRotation: 45, font: { size: 11 }, color: '#94a3b8' },
-                        grid: { color: '#334155' }
-                    }
+        if(chartDetay)chartDetay.destroy();
+        chartDetay=new Chart(document.getElementById('grafik-detay'),{
+            type:'bar',
+            data:{labels:hedef.konular,datasets:[
+                {label:'Çözülen Soru',data:tSoru,backgroundColor:'#38bdf8',borderRadius:6,yAxisID:'y'},
+                {label:'Süre (dk)',data:tSure,backgroundColor:'rgba(245,158,11,0.6)',borderRadius:6,yAxisID:'y1'}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,
+                plugins:{legend:{position:'top',labels:{color:'#f8fafc'}}},
+                scales:{
+                    y:{beginAtZero:true,position:'left',title:{display:true,text:'Soru',color:'#38bdf8'},ticks:{color:'#94a3b8'},grid:{color:'#334155'}},
+                    y1:{beginAtZero:true,position:'right',title:{display:true,text:'Süre (dk)',color:'#f59e0b'},ticks:{color:'#94a3b8'},grid:{drawOnChartArea:false}},
+                    x:{ticks:{maxRotation:45,minRotation:45,font:{size:11},color:'#94a3b8'},grid:{color:'#334155'}}
                 }
             }
         });
