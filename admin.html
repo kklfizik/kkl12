@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretmen Kontrol Paneli - Fizik Takip</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        #ekran-sifre { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+        .sifre-kart { background: #1e293b; padding: 40px; border-radius: 15px; text-align: center; border: 1px solid #334155; }
+        .sifre-kart input { padding: 15px; font-size: 24px; text-align: center; width: 150px; border-radius: 8px; border: 2px solid #475569; background: #0f172a; color: white; margin: 20px 0;}
+        .btn { padding: 12px 24px; background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        #ekran-panel { display: none; }
+        .baslik { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ef4444; padding-bottom: 10px; margin-bottom: 20px;}
+        h1 { color: #ef4444; margin: 0; font-size: 24px;}
+        
+        .ozet-kartlari { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;}
+        .ozet-kart { background: #1e293b; padding: 20px; border-radius: 10px; flex: 1; min-width: 150px; text-align: center; border: 1px solid #334155;}
+        .ozet-kart .sayi { font-size: 32px; font-weight: bold; color: #38bdf8; }
+        .ozet-kart .metin { color: #94a3b8; font-size: 14px; margin-top: 5px;}
+
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; margin-bottom: 30px;}
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #334155; color: #f8fafc; font-weight: 600; }
+        tr:hover { background: #334155; cursor: pointer; }
+        .basarili { color: #4ade80; font-weight: bold; }
+        .basarisiz { color: #f87171; font-weight: bold; }
+
+        .ogrenci-detay { background: #1e293b; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; border: 1px solid #334155;}
+        .grafik-kutu { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; height: 350px;}
+    </style>
+</head>
+<body>
+
+    <!-- ŞİFRE EKRANI -->
+    <div id="ekran-sifre">
+        <div class="sifre-kart">
+            <h2>🔒 Öğretmen Paneli</h2>
+            <p style="color: #94a3b8;">Erişim PIN kodunuzu giriniz.</p>
+            <input type="password" id="pin-input" maxlength="4" autofocus>
+            <br>
+            <button class="btn" onclick="girisYap()">Giriş</button>
+        </div>
+    </div>
+
+    <!-- ANA KONTROL PANELİ -->
+    <div id="ekran-panel">
+        <div class="baslik">
+            <h1>⚛️ Fizik Sınıf İstatistikleri</h1>
+            <button class="btn" style="background: #475569;" onclick="location.reload()">Yenile / Çıkış</button>
+        </div>
+
+        <div class="ozet-kartlari">
+            <div class="ozet-kart"><div class="sayi" id="top-ogrenci">0</div><div class="metin">Aktif Öğrenci</div></div>
+            <div class="ozet-kart"><div class="sayi" id="top-kayit">0</div><div class="metin">Toplam Kayıt</div></div>
+            <div class="ozet-kart"><div class="sayi" id="top-soru">0</div><div class="metin">Çözülen Soru</div></div>
+            <div class="ozet-kart"><div class="sayi" id="top-sure">0</div><div class="metin">Toplam Dakika</div></div>
+        </div>
+
+        <h3>Öğrenci Durum Tablosu (Detay için satıra tıklayın)</h3>
+        <table id="ogrenci-tablosu">
+            <thead>
+                <tr>
+                    <th>Öğrenci Kodu</th>
+                    <th>Kayıt Sayısı</th>
+                    <th>Toplam Soru</th>
+                    <th>Toplam Süre</th>
+                    <th>Başarı %</th>
+                </tr>
+            </thead>
+            <tbody id="tablo-govde"></tbody>
+        </table>
+
+        <!-- Seçilen Öğrencinin Detaylı Grafiği -->
+        <div class="ogrenci-detay" id="ogrenci-detay">
+            <h2 id="secili-ogrenci-adi"></h2>
+            <select id="detay-sinav" onchange="ogrenciGrafigiCiz()">
+                <option value="AYT">AYT Fizik</option>
+                <option value="TYT">TYT Fizik</option>
+            </select>
+            <div class="grafik-kutu"><canvas id="grafik-detay"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        // SUPABASE BAĞLANTISI
+        var SB_URL = 'https://qatthkcayytafdhiogyp.supabase.co';
+        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
+        var sb = supabase.createClient(SB_URL, SB_KEY);
+
+        // ÖĞRETMEN ŞİFRESİ (Burayı değiştirebilirsiniz)
+        var OGRETMEN_PIN = "1044"; 
+
+        var HEDEFLER = {
+            TYT: { konular: ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "İş, Güç ve Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik Akımı", "Basınç", "Optik", "Dalgalar"] },
+            AYT: { konular: ["Vektörler ve Kuvvet", "Bağıl Hareket", "Newton Hareket Yasaları", "Çember Hareketi", "Basit Harmonik Hareket", "İş ve Enerji", "İtme ve Momentum", "Tork ve Denge", "Elektrik Alan", "Manyetik Alan", "Alternatif Akım", "Modern Fizik", "Atom ve Nükleer Fizik"] }
+        };
+
+        var tumVeriler = [];
+        var seciliOgrenciKodu = "";
+        var chartDetay = null;
+
+        document.getElementById('pin-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') girisYap(); });
+
+        function girisYap() {
+            if (document.getElementById('pin-input').value === OGRETMEN_PIN) {
+                document.getElementById('ekran-sifre').style.display = 'none';
+                document.getElementById('ekran-panel').style.display = 'block';
+                verileriCek();
+            } else {
+                alert("Hatalı PIN kodu!");
+            }
+        }
+
+        async function verileriCek() {
+            var result = await sb.from('fizik_takip').select('*');
+            if (result.error) { alert("Veri çekilemedi: " + result.error.message); return; }
+            
+            tumVeriler = result.data;
+            tabloyuDoldur();
+        }
+
+        function tabloyuDoldur() {
+            var ogrenciler = {};
+            tumVeriler.forEach(function(v) {
+                if (!ogrenciler[v.ogrenci_kodu]) {
+                    ogrenciler[v.ogrenci_kodu] = { kayit: 0, soru: 0, sure: 0, dogru: 0, yanlis: 0 };
+                }
+                ogrenciler[v.ogrenci_kodu].kayit++;
+                ogrenciler[v.ogrenci_kodu].soru += (v.cozulen_soru || 0);
+                ogrenciler[v.ogrenci_kodu].sure += (v.sure_dakika || 0);
+                ogrenciler[v.ogrenci_kodu].dogru += (v.dogru_sayisi || 0);
+                ogrenciler[v.ogrenci_kodu].yanlis += (v.yanlis_sayisi || 0);
+            });
+
+            var govde = document.getElementById('tablo-govde');
+            govde.innerHTML = '';
+            var ogrenciSayisi = 0;
+            var genelSoru = 0, genelSure = 0;
+
+            for (var kod in ogrenciler) {
+                ogrenciSayisi++;
+                var o = ogrenciler[kod];
+                genelSoru += o.soru;
+                genelSure += o.sure;
+                var cozulen = o.dogru + o.yanlis;
+                var basari = cozulen > 0 ? Math.round((o.dogru / cozulen) * 100) : 0;
+                
+                var tr = document.createElement('tr');
+                tr.onclick = function() { ogrenciSec(this.getAttribute('data-kod')); };
+                tr.setAttribute('data-kod', kod);
+                tr.innerHTML = `
+                    <td><strong>${kod}</strong></td>
+                    <td>${o.kayit}</td>
+                    <td>${o.soru}</td>
+                    <td>${o.sure} dk</td>
+                    <td class="${basari >= 60 ? 'basarili' : 'basarisiz'}">%${basari}</td>
+                `;
+                govde.appendChild(tr);
+            }
+
+            document.getElementById('top-ogrenci').textContent = ogrenciSayisi;
+            document.getElementById('top-kayit').textContent = tumVeriler.length;
+            document.getElementById('top-soru').textContent = genelSoru;
+            document.getElementById('top-sure').textContent = genelSure;
+        }
+
+        function ogrenciSec(kod) {
+            seciliOgrenciKodu = kod;
+            document.getElementById('secili-ogrenci-adi').textContent = "📊 " + kod + " - Detaylı Analiz";
+            document.getElementById('ogrenci-detay').style.display = 'block';
+            ogrenciGrafigiCiz();
+        }
+
+        function ogrenciGrafigiCiz() {
+            var tip = document.getElementById('detay-sinav').value;
+            var hedef = HEDEFLER[tip];
+            var toplamSoru = new Array(hedef.konular.length).fill(0);
+
+            tumVeriler.forEach(function(v) {
+                if (v.ogrenci_kodu === seciliOgrenciKodu && v.sinav_tipi === tip) {
+                    var idx = hedef.konular.indexOf(v.konu);
+                    if (idx !== -1) toplamSoru[idx] += (v.cozulen_soru || 0);
+                }
+            });
+
+            if (chartDetay) chartDetay.destroy();
+            chartDetay = new Chart(document.getElementById('grafik-detay'), {
+                type: 'bar',
+                data: {
+                    labels: hedef.konular,
+                    datasets: [{ label: 'Çözülen Soru', data: toplamSoru, backgroundColor: '#38bdf8' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+    </script>
+</body>
+</html>
