@@ -50,6 +50,17 @@
         .grafik-kart h3{font-size:16px;color:#3F3699;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #EDEAFB}
         .grafik-alan{position:relative;height:320px;width:100%}
         .grafik-alan-kisa{position:relative;height:240px;width:100%}
+        .kayit-liste{max-height:320px;overflow-y:auto}
+        .kayit-liste::-webkit-scrollbar{width:8px}
+        .kayit-liste::-webkit-scrollbar-track{background:#F4F2FB;border-radius:4px}
+        .kayit-liste::-webkit-scrollbar-thumb{background:#EDEAFB;border-radius:4px}
+        .kayit-satir{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1px solid #EDEAFB;gap:8px}
+        .kayit-bilgi{font-size:14px;color:#3F3699;line-height:1.4}
+        .kayit-alt{font-size:12px;color:#6b64a8}
+        .kayit-bos{font-size:13px;color:#6b64a8;text-align:center;padding:16px}
+        .btn-mini{padding:6px 10px;border:none;border-radius:6px;font-size:13px;cursor:pointer;margin-left:6px}
+        .btn-mini-duzenle{background:#EDEAFB;color:#5B4FC7}
+        .btn-mini-sil{background:#fee2e2;color:#dc2626}
         #modal-veri{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(46,39,114,.6);z-index:1000;align-items:center;justify-content:center;padding:20px}
         .modal-icerik{background:#fff;border-radius:20px;padding:25px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
         .modal-icerik h3{font-size:20px;margin-bottom:20px;text-align:center;color:#3F3699}
@@ -145,11 +156,20 @@
             <h3>📈 Deneme Sınavı Net Gelişimi</h3>
             <div class="grafik-alan-kisa"><canvas id="grafik-deneme"></canvas></div>
         </div>
+
+        <div class="grafik-kart">
+            <h3>📋 Çalışma Kayıtlarım</h3>
+            <div class="kayit-liste" id="liste-calisma"></div>
+        </div>
+        <div class="grafik-kart">
+            <h3>📝 Deneme Kayıtlarım</h3>
+            <div class="kayit-liste" id="liste-deneme"></div>
+        </div>
     </div>
 
     <div id="modal-veri">
         <div class="modal-icerik">
-            <h3>📝 Veri Girişi</h3>
+            <h3 id="modal-baslik">📝 Veri Girişi</h3>
 
             <div class="form-grup">
                 <label>Sınav Tipi</label>
@@ -203,13 +223,13 @@
                 <p class="soru-bilgi">TYT Fizik: 7 soru • AYT Fizik: 14 soru</p>
             </div>
 
-            <button class="btn btn-yesil" onclick="veriKaydet()">💾 Kaydet</button>
+            <button class="btn btn-yesil" id="btn-kaydet" onclick="veriKaydet()">💾 Kaydet</button>
             <button class="btn btn-gri" onclick="modalKapat()">İptal</button>
         </div>
     </div>
 
     <script>
-    var VERSIYON="v2.5.0";
+    var VERSIYON="v2.6.0";
     var SB_URL='https://qatthkcayytafdhiogyp.supabase.co';
     var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHRoa2NheXl0YWZkaGlvZ3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzY5NjksImV4cCI6MjEwNjExMjk2OX0.L0kySY8M7RzVs1uzHs7RRWCzLnJB1OtfWGkKsHegKIY';
     var sb=supabase.createClient(SB_URL,SB_KEY);
@@ -230,7 +250,11 @@
     var aktifKod='';
     var aktifSube='';
     var aktifTip='calisma';
+    var duzenlemeId=null;
+    var duzenlemeTip=null;
     var denemeler=[];
+    var calismaKayitlari=[];
+    var denemeKayitlari=[];
     var chartSoru=null;
     var chartSure=null;
     var chartDeneme=null;
@@ -263,9 +287,14 @@
         document.getElementById('etiket-kod').textContent=aktifKod;
         document.getElementById('etiket-sube').textContent=aktifSube;
         modalKonulariGuncelle();
+        tumunuYenile();
+        ogretmenRaporunuGetir();
+    }
+
+    function tumunuYenile(){
         veriGetir();
         denemeGetir();
-        ogretmenRaporunuGetir();
+        kayitlariGetir();
     }
 
     function cikisYap(){
@@ -276,8 +305,28 @@
         }
     }
 
-    function modalAc(){document.getElementById('modal-veri').style.display='flex';modalKonulariGuncelle()}
-    function modalKapat(){document.getElementById('modal-veri').style.display='none'}
+    function modalAc(){
+        duzenlemeId=null;duzenlemeTip=null;
+        document.getElementById('modal-baslik').textContent='📝 Veri Girişi';
+        document.getElementById('btn-kaydet').textContent='💾 Kaydet';
+        tipSec('calisma');
+        formuTemizle();
+        document.getElementById('modal-veri').style.display='flex';
+        modalKonulariGuncelle();
+    }
+
+    function modalKapat(){
+        duzenlemeId=null;duzenlemeTip=null;
+        document.getElementById('modal-veri').style.display='none';
+    }
+
+    function formuTemizle(){
+        ['m-sure','m-soru','m-dogru','m-yanlis','m-deneme-adi','m-dogru-d','m-yanlis-d','m-bos-d','m-sure-d'].forEach(function(id){
+            document.getElementById(id).value='';
+        });
+        document.getElementById('m-ozguven').value='3';
+        netHesapla();
+    }
 
     function tipSec(t){
         aktifTip=t;
@@ -303,6 +352,53 @@
         });
     }
 
+    // ==========================================
+    // KAYIT DÜZENLEME MODU
+    // ==========================================
+    function kayitDuzenle(tip,id){
+        var kayit=null;
+        if(tip==='calisma'){
+            kayit=calismaKayitlari.find(function(v){return v.id===id});
+        }else{
+            kayit=denemeKayitlari.find(function(v){return v.id===id});
+        }
+        if(!kayit)return;
+        duzenlemeId=id;duzenlemeTip=tip;
+        document.getElementById('modal-baslik').textContent='✏️ Kaydı Düzenle';
+        document.getElementById('btn-kaydet').textContent='💾 Güncelle';
+        document.getElementById('m-sinav').value=kayit.sinav_tipi;
+        modalKonulariGuncelle();
+        tipSec(tip);
+        if(tip==='calisma'){
+            document.getElementById('m-konu').value=kayit.konu;
+            document.getElementById('m-sure').value=kayit.sure_dakika;
+            document.getElementById('m-soru').value=kayit.cozulen_soru;
+            document.getElementById('m-dogru').value=kayit.dogru_sayisi;
+            document.getElementById('m-yanlis').value=kayit.yanlis_sayisi;
+            document.getElementById('m-ozguven').value=kayit.ozguven||3;
+        }else{
+            document.getElementById('m-deneme-adi').value=kayit.deneme_adi;
+            document.getElementById('m-dogru-d').value=kayit.dogru;
+            document.getElementById('m-yanlis-d').value=kayit.yanlis;
+            document.getElementById('m-bos-d').value=kayit.bos;
+            document.getElementById('m-sure-d').value=kayit.sure_dakika;
+            netHesapla();
+        }
+        document.getElementById('modal-veri').style.display='flex';
+    }
+
+    async function kayitSil(tip,id){
+        if(!confirm('Bu kayıt kalıcı olarak silinecek. Emin misiniz?'))return;
+        var tablo=(tip==='calisma')?'fizik_takip':'deneme_sinavlari';
+        var r=await sb.from(tablo).delete().eq('id',id);
+        if(r.error){bildirimGoster('Silme hatası: '+r.error.message,'#ef4444');return}
+        bildirimGoster('🗑️ Kayıt silindi.','#10b981');
+        tumunuYenile();
+    }
+
+    // ==========================================
+    // KAYDET / GÜNCELLE
+    // ==========================================
     async function veriKaydet(){
         if(aktifTip==='deneme'){await denemeKaydet();return}
         var sinav=document.getElementById('m-sinav').value;
@@ -313,19 +409,24 @@
         var yanlis=parseInt(document.getElementById('m-yanlis').value)||0;
         var ozguven=parseInt(document.getElementById('m-ozguven').value)||3;
         if(sure===0&&soru===0){bildirimGoster('Lütfen en az süre veya soru girin.','#ef4444');return}
-        var r=await sb.from('fizik_takip').insert([{
-            ogrenci_kodu:aktifKod,sube:aktifSube,sinav_tipi:sinav,konu:konu,
-            sure_dakika:sure,cozulen_soru:soru,dogru_sayisi:dogru,yanlis_sayisi:yanlis,ozguven:ozguven
-        }]);
+
+        var r;
+        if(duzenlemeId&&duzenlemeTip==='calisma'){
+            r=await sb.from('fizik_takip').update({
+                sinav_tipi:sinav,konu:konu,sure_dakika:sure,cozulen_soru:soru,
+                dogru_sayisi:dogru,yanlis_sayisi:yanlis,ozguven:ozguven
+            }).eq('id',duzenlemeId);
+        }else{
+            r=await sb.from('fizik_takip').insert([{
+                ogrenci_kodu:aktifKod,sube:aktifSube,sinav_tipi:sinav,konu:konu,
+                sure_dakika:sure,cozulen_soru:soru,dogru_sayisi:dogru,yanlis_sayisi:yanlis,ozguven:ozguven
+            }]);
+        }
         if(r.error){bildirimGoster('Hata: '+r.error.message,'#ef4444');return}
-        document.getElementById('m-sure').value='';
-        document.getElementById('m-soru').value='';
-        document.getElementById('m-dogru').value='';
-        document.getElementById('m-yanlis').value='';
-        document.getElementById('m-ozguven').value='3';
+        formuTemizle();
         modalKapat();
-        bildirimGoster('✅ Veri kaydedildi!','#10b981');
-        veriGetir();
+        bildirimGoster(duzenlemeId?'✅ Kayıt güncellendi!':'✅ Veri kaydedildi!','#10b981');
+        tumunuYenile();
     }
 
     async function denemeKaydet(){
@@ -338,22 +439,28 @@
         if(!ad){bildirimGoster('Lütfen deneme adı girin.','#ef4444');return}
         if(d+y+b===0){bildirimGoster('Doğru, yanlış veya boş alanlarından en az birini girin.','#ef4444');return}
         var net=Math.round((d-y/4)*100)/100;
-        var r=await sb.from('deneme_sinavlari').insert([{
-            ogrenci_kodu:aktifKod,sube:aktifSube,sinav_tipi:sinav,deneme_adi:ad,
-            dogru:d,yanlis:y,bos:b,sure_dakika:sure,net:net
-        }]);
+
+        var r;
+        if(duzenlemeId&&duzenlemeTip==='deneme'){
+            r=await sb.from('deneme_sinavlari').update({
+                sinav_tipi:sinav,deneme_adi:ad,dogru:d,yanlis:y,bos:b,sure_dakika:sure,net:net
+            }).eq('id',duzenlemeId);
+        }else{
+            r=await sb.from('deneme_sinavlari').insert([{
+                ogrenci_kodu:aktifKod,sube:aktifSube,sinav_tipi:sinav,deneme_adi:ad,
+                dogru:d,yanlis:y,bos:b,sure_dakika:sure,net:net
+            }]);
+        }
         if(r.error){bildirimGoster('Hata: '+r.error.message,'#ef4444');return}
-        document.getElementById('m-deneme-adi').value='';
-        document.getElementById('m-dogru-d').value='';
-        document.getElementById('m-yanlis-d').value='';
-        document.getElementById('m-bos-d').value='';
-        document.getElementById('m-sure-d').value='';
-        netHesapla();
+        formuTemizle();
         modalKapat();
-        bildirimGoster('✅ Deneme kaydedildi!','#10b981');
-        denemeGetir();
+        bildirimGoster(duzenlemeId?'✅ Deneme güncellendi!':'✅ Deneme kaydedildi!','#10b981');
+        tumunuYenile();
     }
 
+    // ==========================================
+    // VERİ ÇEKME VE GRAFİKLER
+    // ==========================================
     async function veriGetir(){
         var tip=document.getElementById('select-sinav').value;
         var r=await sb.from('fizik_takip').select('konu,sure_dakika,cozulen_soru,dogru_sayisi,yanlis_sayisi')
@@ -390,6 +497,50 @@
         var sonNet=denemeler.length?denemeler[denemeler.length-1].net:null;
         document.getElementById('ist-son-net').textContent=(sonNet!==null)?sonNet:'-';
         grafikDenemeCiz(tip);
+    }
+
+    async function kayitlariGetir(){
+        var rc=await sb.from('fizik_takip').select('*')
+            .eq('ogrenci_kodu',aktifKod).order('created_at',{ascending:false});
+        calismaKayitlari=rc.data||[];
+        var rd=await sb.from('deneme_sinavlari').select('*')
+            .eq('ogrenci_kodu',aktifKod).order('created_at',{ascending:false});
+        denemeKayitlari=rd.data||[];
+        kayitListesiCiz();
+    }
+
+    function kayitListesiCiz(){
+        var c=document.getElementById('liste-calisma');
+        c.innerHTML='';
+        if(calismaKayitlari.length===0){
+            c.innerHTML='<div class="kayit-bos">Henüz çalışma kaydı yok.</div>';
+        }
+        calismaKayitlari.forEach(function(v){
+            var t=new Date(v.created_at).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+            var div=document.createElement('div');div.className='kayit-satir';
+            div.innerHTML='<div class="kayit-bilgi"><strong>['+v.sinav_tipi+']</strong> '+v.konu+
+                '<br><span class="kayit-alt">'+t+' • '+v.cozulen_soru+' soru • '+v.dogru_sayisi+'D/'+v.yanlis_sayisi+'Y • '+v.sure_dakika+' dk</span></div>'+
+                '<div style="white-space:nowrap">'+
+                '<button class="btn-mini btn-mini-duzenle" onclick="kayitDuzenle(\'calisma\',\''+v.id+'\')">✏️</button>'+
+                '<button class="btn-mini btn-mini-sil" onclick="kayitSil(\'calisma\',\''+v.id+'\')">🗑️</button></div>';
+            c.appendChild(div);
+        });
+
+        var d=document.getElementById('liste-deneme');
+        d.innerHTML='';
+        if(denemeKayitlari.length===0){
+            d.innerHTML='<div class="kayit-bos">Henüz deneme kaydı yok.</div>';
+        }
+        denemeKayitlari.forEach(function(v){
+            var t=new Date(v.created_at).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+            var div=document.createElement('div');div.className='kayit-satir';
+            div.innerHTML='<div class="kayit-bilgi"><strong>['+v.sinav_tipi+']</strong> '+v.deneme_adi+
+                '<br><span class="kayit-alt">'+t+' • Net: '+v.net+' • '+v.dogru+'D/'+v.yanlis+'Y/'+v.bos+'B</span></div>'+
+                '<div style="white-space:nowrap">'+
+                '<button class="btn-mini btn-mini-duzenle" onclick="kayitDuzenle(\'deneme\',\''+v.id+'\')">✏️</button>'+
+                '<button class="btn-mini btn-mini-sil" onclick="kayitSil(\'deneme\',\''+v.id+'\')">🗑️</button></div>';
+            d.appendChild(div);
+        });
     }
 
     function markdownDuzenle(metin){
