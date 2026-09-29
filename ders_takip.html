@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Fizik Ders Takip</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#eef1f7; color:#1f2937; }
+  header { background:#1e3a8a; color:#fff; padding:14px 16px; position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  header h1 { font-size:18px; margin:0; flex:1; }
+  header .sub { font-size:12px; opacity:.85; }
+  #backBtn, #manageBtn { background:rgba(255,255,255,.18); border:0; color:#fff; font-size:14px; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  #backBtn { display:none; }
+
+  /* ===== İNTERNET KONTROLÜ — şerit stilleri ===== */
+  #netBanner { display:none; flex-basis:100%; align-items:center; justify-content:space-between; gap:10px;
+               margin-top:4px; padding:10px 12px; border-radius:10px; font-size:14px; line-height:1.35; }
+  #netBanner.err { background:#fee2e2; color:#7f1d1d; border:1px solid #dc2626; }
+  #netBanner.ok  { background:#dcfce7; color:#14532d; border:1px solid #16a34a; }
+  #netRetry { background:#7f1d1d; color:#fff; border:0; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  #netRetry:active { transform:scale(.96); }
+
+  main { padding:14px; max-width:760px; margin:0 auto; }
+  #status { padding:12px 14px; border-radius:10px; background:#fff; border:1px solid #e5e7eb; margin-bottom:14px; font-size:14px; }
+  #status.ok { border-color:#bbf7d0; background:#f0fdf4; }
+  #status.err { border-color:#fecaca; background:#fef2f2; color:#991b1b; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer; transition:.12s; }
+  .card:active { transform:scale(.96); }
+  .card .name { font-weight:600; font-size:14px; line-height:1.25; }
+  .card .meta { font-size:11px; color:#6b7280; margin-top:4px; }
+  .sube { font-size:20px; font-weight:700; }
+  .addbtn { width:100%; background:#16a34a; color:#fff; border:0; border-radius:10px; padding:13px; font-size:15px; cursor:pointer; margin-bottom:12px; }
+  .addbtn:active { transform:scale(.98); }
+  .srow { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+  .srow .info { flex:1; min-width:0; }
+  .srow .nm { font-weight:600; font-size:14px; }
+  .srow .mt { font-size:11px; color:#6b7280; }
+  .actions { display:flex; gap:4px; flex-shrink:0; }
+  .iconbtn { background:#fff; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; white-space:nowrap; }
+  .iconbtn:active { transform:scale(.95); }
+  .iconbtn.danger { background:#dc2626; color:#fff; border-color:#dc2626; }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:10; }
+  #sheet { display:none; position:fixed; left:0; right:0; bottom:0; max-height:88vh; overflow:auto; background:#fff; border-radius:18px 18px 0 0; z-index:11; padding:16px 16px 24px; box-shadow:0 -6px 24px rgba(0,0,0,.18); }
+  #sheet h2 { margin:0 0 2px; font-size:18px; }
+  #sheet .who { font-size:12px; color:#6b7280; margin-bottom:10px; }
+  .modeRow { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .modebadge { font-size:12px; padding:3px 10px; border-radius:999px; background:#e0e7ff; color:#312e81; font-weight:600; }
+  .modebadge.edit { background:#fef3c7; color:#92400e; }
+  .linkbtn { background:none; border:0; color:#1e3a8a; font-size:13px; cursor:pointer; text-decoration:underline; padding:2px 4px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .chip { border:1px solid #d1d5db; background:#f9fafb; border-radius:999px; padding:8px 12px; font-size:13px; cursor:pointer; user-select:none; }
+  .chip.pos.on { background:#dcfce7; border-color:#16a34a; color:#14532d; }
+  .chip.neg.on { background:#fee2e2; border-color:#dc2626; color:#7f1d1d; }
+  .chip.neu.on { background:#e0e7ff; border-color:#4f46e5; color:#312e81; }
+  textarea { width:100%; min-height:64px; border:1px solid #d1d5db; border-radius:10px; padding:10px; font:inherit; resize:vertical; }
+  .row { display:flex; gap:10px; margin-top:12px; }
+  .btn { flex:1; border:0; border-radius:10px; padding:13px; font-size:15px; cursor:pointer; }
+  .btn.save { background:#1e3a8a; color:#fff; }
+  .btn.cancel { background:#e5e7eb; color:#374151; }
+  .hist { margin-top:14px; border-top:1px dashed #e5e7eb; padding-top:10px; }
+  .hist h3 { font-size:13px; color:#6b7280; margin:0 0 8px; }
+  .hitem { background:#f9fafb; border:1px solid #eee; border-radius:10px; padding:8px 10px; margin-bottom:8px; font-size:13px; }
+  .hitem .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .hitem .body { flex:1; }
+  .hitem .d { color:#6b7280; font-size:11px; }
+  .hitem .t { display:inline-block; margin:2px 4px 0 0; padding:2px 8px; border-radius:999px; font-size:11px; }
+  .t.pos{background:#dcfce7;color:#14532d;} .t.neg{background:#fee2e2;color:#7f1d1d;} .t.neu{background:#e0e7ff;color:#312e81;}
+  #formOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:12; }
+  #formSheet { display:none; position:fixed; left:0; right:0; bottom:0; max-height:88vh; overflow:auto; background:#fff; border-radius:18px 18px 0 0; z-index:13; padding:16px 16px 24px; box-shadow:0 -6px 24px rgba(0,0,0,.18); }
+  #formSheet h2 { margin:0 0 4px; font-size:18px; }
+  #formSheet .fcls { font-size:13px; color:#6b7280; margin-bottom:8px; }
+  .fgroup label { font-size:12px; color:#6b7280; display:block; margin:10px 0 4px; }
+  .fgroup input { width:100%; border:1px solid #d1d5db; border-radius:8px; padding:10px; font:inherit; }
+  .frow2 { display:flex; gap:10px; }
+  .frow2 .fgroup { flex:1; }
+  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111827; color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:.25s; z-index:20; pointer-events:none; }
+  #toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<header>
+  <button id="backBtn">← Geri</button>
+  <div style="flex:1">
+    <h1>Fizik Ders Takip</h1>
+    <div class="sub" id="hdrSub">Şube seçiniz</div>
+  </div>
+  <button id="manageBtn">👥 Öğrenciler</button>
+
+  <!-- ===== İNTERNET KONTROLÜ — şerit ===== -->
+  <div id="netBanner">
+    <span id="netMsg"></span>
+    <button id="netRetry">Tekrar Dene</button>
+  </div>
+</header>
+
+<main>
+  <div id="status">Hazırlanıyor…</div>
+  <div id="content"></div>
+</main>
+
+<div id="overlay"></div>
+<div id="sheet">
+  <h2 id="mName"></h2>
+  <div class="who" id="mWho"></div>
+  <div class="modeRow">
+    <span class="modebadge" id="mMode">Yeni not</span>
+    <button id="mNewBtn" class="linkbtn" style="display:none">+ Yeni not ekle</button>
+  </div>
+  <div class="chips" id="mChips"></div>
+  <textarea id="mDetail" placeholder="İsteğe bağlı detay notu…"></textarea>
+  <div class="row">
+    <button class="btn cancel" id="mCancel">Kapat</button>
+    <button class="btn save" id="mSave">Notu Kaydet</button>
+  </div>
+  <div class="hist"><h3>Geçmiş notlar</h3><div id="mHist"></div></div>
+</div>
+
+<div id="formOverlay"></div>
+<div id="formSheet">
+  <h2 id="fTitle">Yeni Öğrenci</h2>
+  <div class="fcls" id="fCls"></div>
+  <div class="frow2">
+    <div class="fgroup"><label>Sıra No</label><input id="fSeat" type="number" inputmode="numeric" placeholder="Örn: 1" /></div>
+    <div class="fgroup"><label>Okul No</label><input id="fNum" type="number" inputmode="numeric" placeholder="Örn: 578" /></div>
+  </div>
+  <div class="fgroup"><label>Ad Soyad</label><input id="fName" type="text" placeholder="Örn: AYŞE YILMAZ" /></div>
+  <div class="row">
+    <button class="btn cancel" id="fCancel">Vazgeç</button>
+    <button class="btn save" id="fSave">Kaydet</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== Supabase bağlantısı (anon anahtar publicly tasarlanmıştır) ===== */
+const SUPABASE_URL = "https://hxrshhnvaknauhgqrlkb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4cnNoaG52YWtuYXVoZ3FybGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTM1NzEsImV4cCI6MjEwNjI4OTU3MX0.wnjhb3w9N_J35EL9MLQRXq3V3KsRQ_p3MmjqfgH3HAs";
+const { createClient } = window.supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TAGS = [
+  {label:"Çok Başarılı", type:"pos"},
+  {label:"Çok İstekli", type:"pos"},
+  {label:"Dikkatli", type:"pos"},
+  {label:"Katılımcı", type:"pos"},
+  {label:"Dinlemiyor", type:"neg"},
+  {label:"Ödevini Yapmamış", type:"neg"},
+  {label:"Not Almıyor", type:"neg"},
+  {label:"Dikkat Dağınık", type:"neg"},
+  {label:"Derse Girmedi", type:"neg"},
+  {label:"Derse Geç Geldi", type:"neg"},
+  {label:"Pasif", type:"neu"}
+];
+
+/* ===== DOM ===== */
+const $ = (id) => document.getElementById(id);
+const statusEl=$("status"), contentEl=$("content"), hdrSub=$("hdrSub");
+const overlay=$("overlay"), sheet=$("sheet"), backBtn=$("backBtn"), manageBtn=$("manageBtn");
+const formOverlay=$("formOverlay"), formSheet=$("formSheet");
+
+/* ===== State ===== */
+let viewMode = "track";
+let currentClass = null;
+let manageClass = null;
+let currentStudent = null;
+let selectedTags = new Set();
+let editingId = null;
+let editingStudentId = null;
+
+function setStatus(msg, kind){ statusEl.textContent = msg; statusEl.className = kind || ""; }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function fmtDate(d){ try{ return new Date(d).toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric"});}catch(_){return d;} }
+
+/* ===== İNTERNET KONTROLÜ — yardımcılar ===== */
+function isNetworkError(e){
+  const m = (e && e.message) ? String(e.message) : "";
+  return (e instanceof TypeError) || /failed to fetch|network|fetch|timeout|enotfound|econnrefused|unreachable/i.test(m);
+}
+function setNetBanner(state, msg){
+  const b = $("netBanner");
+  if(state === "hide"){ b.style.display="none"; b.className=""; return; }
+  b.style.display = "flex";
+  b.className = state; // "err" veya "ok"
+  $("netMsg").textContent = msg || (state==="err" ? "İnternet bağlantısı sorunu." : "Bağlantı kuruldu.");
+  $("netRetry").style.display = (state==="err") ? "inline-block" : "none";
+  if(state === "ok"){ setTimeout(()=>setNetBanner("hide"), 2500); }
+}
+// Okuma (veri çekme) hataları: ağ hatasıysa şerit, değilse durum kutusu
+function reportReadError(e, fallback){
+  if(isNetworkError(e)){ setNetBanner("err", "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip 'Tekrar Dene' butonuna basın."); }
+  else { setStatus(fallback || ("Hata: " + (e && e.message ? e.message : e)), "err"); }
+}
+// Yazma (kaydet/sil/güncelle) hataları: ağ hatasıysa şerit + net toast
+function reportWriteError(e){
+  if(isNetworkError(e)){ setNetBanner("err", "İnternet yok; işlem kaydedilemedi."); toast("İnternet yok, kaydedilemedi."); }
+  else { toast("İşlem başarısız: " + (e && e.message ? e.message : e)); }
+}
+
+/* ===== Açılış ===== */
+async function boot(){
+  viewMode="track"; manageClass=null;
+  // 1) Cihaz ağa bağlı mı?
+  if(!navigator.onLine){
+    setNetBanner("err", "İnternet bağlantısı bulunamadı. Bağlantınızı kontrol edip 'Tekrar Dene' butonuna basın.");
+    setStatus("Bağlantı bekleniyor…", "");
+    return;
+  }
+  setNetBanner("hide"); // varsa bayat uyarıyı temizle
+  try{
+    // 2) Sunucuya erişilebiliyor mu?
+    const { count, error } = await db.from("classes").select("*",{count:"exact",head:true});
+    if(error) throw error;
+    if(!count){ setStatus("Hiç şube bulunamadı. Supabase > Table Editor > classes üzerinden şube ekleyin.","err"); contentEl.innerHTML=""; return; }
+    await loadClasses();
+  }catch(e){ reportReadError(e, "Hata: " + (e && e.message ? e.message : e)); }
+}
+
+/* ===== Şube listesi (ders takibi) ===== */
+async function loadClasses(){
+  viewMode="track"; currentClass=null; manageClass=null;
+  setNetBanner("hide");
+  hdrSub.textContent="Şube seçiniz"; backBtn.style.display="none";
+  const { data, error } = await db.from("classes").select("id,name").order("name");
+  if(error){ reportReadError(error); return; }
+  setStatus(data.length+" şube. Ders takibi için bir şube seçin.","ok");
+  contentEl.innerHTML='<div class="grid"></div>';
+  const g=contentEl.querySelector(".grid");
+  data.forEach(c=>{
+    const d=document.createElement("div"); d.className="card sube"; d.textContent=c.name;
+    d.onclick=()=>selectClass(c); g.appendChild(d);
+  });
+}
+
+/* ===== Öğrenci ızgarası (ders takibi) ===== */
+async function selectClass(c){
+  viewMode="track"; currentClass=c;
+  setNetBanner("hide");
+  hdrSub.textContent=c.name+" · öğrenciler"; backBtn.style.display="inline-block";
+  setStatus(c.name+" öğrencileri yükleniyor…","");
+  const { data, error } = await db.from("students").select("id,seat_number,student_number,full_name")
+    .eq("class_id",c.id).order("seat_number",{ascending:true});
+  if(error){ reportReadError(error); return; }
+  setStatus(data.length+" öğrenci. Not almak için öğrenciye dokunun.","ok");
+  contentEl.innerHTML='<div class="grid"></div>';
+  const g=contentEl.querySelector(".grid");
+  data.forEach(s=>{
+    const d=document.createElement("div"); d.className="card";
+    d.innerHTML='<div class="name">'+esc(s.full_name)+'</div><div class="meta">Sıra '+(s.seat_number??"-")+' · No '+(s.student_number??"-")+'</div>';
+    d.onclick=()=>openSheet(s); g.appendChild(d);
+  });
+}
+
+/* ===== Öğrenci Yönetimi ===== */
+async function openManage(){
+  viewMode="manage"; manageClass=null;
+  setNetBanner("hide");
+  hdrSub.textContent="Öğrenci Yönetimi · şube seçiniz"; backBtn.style.display="inline-block";
+  const { data, error } = await db.from("classes").select("id,name").order("name");
+  if(error){ reportReadError(error); return; }
+  setStatus("Yönetmek istediğiniz şubeyi seçin.","ok");
+  contentEl.innerHTML='<div class="grid"></div>';
+  const g=contentEl.querySelector(".grid");
+  data.forEach(c=>{
+    const d=document.createElement("div"); d.className="card sube"; d.textContent=c.name;
+    d.onclick=()=>renderManageStudents(c); g.appendChild(d);
+  });
+}
+
+async function renderManageStudents(c){
+  viewMode="manage"; manageClass=c;
+  setNetBanner("hide");
+  hdrSub.textContent="Öğrenci Yönetimi · "+c.name; backBtn.style.display="inline-block";
+  setStatus(c.name+" öğrencileri yükleniyor…","");
+  const { data, error } = await db.from("students").select("id,seat_number,student_number,full_name")
+    .eq("class_id",c.id).order("seat_number",{ascending:true});
+  if(error){ reportReadError(error); return; }
+  setStatus(data.length+" öğrenci.","ok");
+  contentEl.innerHTML="";
+  const add=document.createElement("button"); add.className="addbtn"; add.textContent="＋ Yeni Öğrenci Ekle";
+  add.onclick=()=>openStudentForm(null); contentEl.appendChild(add);
+  const wrap=document.createElement("div"); contentEl.appendChild(wrap);
+  if(!data.length){ wrap.innerHTML='<div style="color:#6b7280;font-size:14px;padding:8px">Bu şubede henüz öğrenci yok.</div>'; return; }
+  data.forEach(s=>{
+    const r=document.createElement("div"); r.className="srow";
+    r.innerHTML='<div class="info"><div class="nm">'+esc(s.full_name)+'</div>'+
+      '<div class="mt">Sıra '+(s.seat_number??"-")+' · No '+(s.student_number??"-")+'</div></div>'+
+      '<div class="actions"><button class="iconbtn ebtn">Düzenle</button><button class="iconbtn dbtn">Sil</button></div>';
+    r.querySelector(".ebtn").onclick=()=>openStudentForm(s);
+    const dbtn=r.querySelector(".dbtn");
+    dbtn.onclick=function(){
+      if(this.dataset.confirm==="1"){ deleteStudent(s.id, this); }
+      else{
+        this.dataset.confirm="1"; this.textContent="Onayla!"; this.classList.add("danger");
+        const self=this;
+        setTimeout(()=>{ self.dataset.confirm=""; self.textContent="Sil"; self.classList.remove("danger"); },3000);
+      }
+    };
+    wrap.appendChild(r);
+  });
+}
+
+/* ===== Öğrenci formu (ekle / düzenle) ===== */
+function openStudentForm(s){
+  editingStudentId = s ? s.id : null;
+  $("fTitle").textContent = s ? "Öğrenci Düzenle" : "Yeni Öğrenci";
+  $("fCls").textContent = "Şube: " + (manageClass ? manageClass.name : "-");
+  $("fSeat").value = s ? (s.seat_number ?? "") : "";
+  $("fNum").value  = s ? (s.student_number ?? "") : "";
+  $("fName").value = s ? s.full_name : "";
+  formOverlay.style.display="block"; formSheet.style.display="block";
+  setTimeout(()=>$("fName").focus(),50);
+}
+function closeStudentForm(){ formOverlay.style.display="none"; formSheet.style.display="none"; editingStudentId=null; }
+formOverlay.onclick=closeStudentForm; $("fCancel").onclick=closeStudentForm;
+
+$("fSave").onclick=async ()=>{
+  const name=$("fName").value.trim();
+  if(!name){ toast("Ad soyad zorunludur."); return; }
+  const seat = $("fSeat").value==="" ? null : parseInt($("fSeat").value,10);
+  const num  = $("fNum").value===""  ? null : parseInt($("fNum").value,10);
+  const payload = { class_id: manageClass.id, seat_number: seat, student_number: num, full_name: name };
+  try{
+    if(editingStudentId){
+      const { error } = await db.from("students").update(payload).eq("id", editingStudentId);
+      if(error) throw error; toast("Öğrenci güncellendi ✓");
+    }else{
+      const { error } = await db.from("students").insert(payload);
+      if(error) throw error; toast("Öğrenci eklendi ✓");
+    }
+    closeStudentForm();
+    renderManageStudents(manageClass);
+  }catch(e){ reportWriteError(e); }
+};
+
+async function deleteStudent(id, btn){
+  try{
+    const { error } = await db.from("students").delete().eq("id", id);
+    if(error) throw error;
+    toast("Öğrenci ve notları silindi ✓");
+    renderManageStudents(manageClass);
+  }catch(e){ reportWriteError(e); }
+}
+
+/* ===== Geri butonu ===== */
+backBtn.onclick=()=>{
+  if(viewMode==="manage"){
+    if(manageClass) openManage();
+    else loadClasses();
+  } else {
+    loadClasses();
+  }
+};
+manageBtn.onclick=openManage;
+
+/* ===== Not paneli ===== */
+function clearSelection(){ selectedTags.clear(); document.querySelectorAll("#mChips .chip").forEach(c=>c.classList.remove("on")); $("mDetail").value=""; }
+function setMode(mode){
+  if(mode==="edit"){ $("mSave").textContent="Değişiklikleri Güncelle"; $("mMode").textContent="Düzenleniyor"; $("mMode").className="modebadge edit"; $("mNewBtn").style.display="inline-block"; }
+  else{ $("mSave").textContent="Notu Kaydet"; $("mMode").textContent="Yeni not"; $("mMode").className="modebadge"; $("mNewBtn").style.display="none"; }
+}
+function openSheet(s){
+  currentStudent=s; editingId=null;
+  $("mName").textContent=s.full_name;
+  $("mWho").textContent="Sıra "+(s.seat_number??"-")+" · Numara "+(s.student_number??"-")+" · "+(currentClass?currentClass.name:"");
+  const cw=$("mChips"); cw.innerHTML="";
+  TAGS.forEach(t=>{
+    const c=document.createElement("div"); c.className="chip "+t.type; c.textContent=t.label;
+    c.onclick=()=>{ if(selectedTags.has(t.label)){selectedTags.delete(t.label);c.classList.remove("on");} else {selectedTags.add(t.label);c.classList.add("on");} };
+    cw.appendChild(c);
+  });
+  clearSelection(); setMode("new"); loadHistory(s.id);
+  overlay.style.display="block"; sheet.style.display="block";
+}
+function closeSheet(){ overlay.style.display="none"; sheet.style.display="none"; currentStudent=null; editingId=null; }
+overlay.onclick=closeSheet; $("mCancel").onclick=closeSheet;
+$("mNewBtn").onclick=()=>{ editingId=null; clearSelection(); setMode("new"); };
+
+function editObservation(o){
+  editingId=o.id; selectedTags=new Set(o.tags||[]);
+  document.querySelectorAll("#mChips .chip").forEach(c=>c.classList.toggle("on", selectedTags.has(c.textContent)));
+  $("mDetail").value=o.note_detail||""; setMode("edit");
+  $("sheet").scrollTo({top:0,behavior:"smooth"});
+}
+async function deleteObservation(id){
+  try{
+    const { error } = await db.from("observations").delete().eq("id", id);
+    if(error) throw error; toast("Not silindi ✓");
+    if(editingId===id){ editingId=null; clearSelection(); setMode("new"); }
+    loadHistory(currentStudent.id);
+  }catch(e){ reportWriteError(e); }
+}
+async function loadHistory(id){
+  const h=$("mHist"); h.innerHTML="<div style='color:#9ca3af;font-size:12px'>Yükleniyor…</div>";
+  const { data, error } = await db.from("observations").select("id,observation_date,tags,note_detail,created_at")
+    .eq("student_id",id).order("created_at",{ascending:false}).limit(30);
+  if(error){
+    if(isNetworkError(error)) setNetBanner("err", "Geçmiş notlar yüklenemedi. İnternet bağlantınızı kontrol edin.");
+    h.innerHTML="<div style='color:#991b1b;font-size:12px'>"+esc(error.message)+"</div>"; return;
+  }
+  if(!data.length){ h.innerHTML="<div style='color:#9ca3af;font-size:12px'>Henüz not yok.</div>"; return; }
+  h.innerHTML="";
+  data.forEach(o=>{
+    const d=document.createElement("div"); d.className="hitem";
+    let tagsHtml=(o.tags||[]).map(t=>{ const meta=TAGS.find(x=>x.label===t); const ty=meta?meta.type:"neu"; return '<span class="t '+ty+'">'+esc(t)+'</span>'; }).join("");
+    const body='<div class="d">'+fmtDate(o.observation_date)+'</div>'+tagsHtml+(o.note_detail?'<div style="margin-top:4px">'+esc(o.note_detail)+'</div>':"");
+    d.innerHTML='<div class="top"><div class="body">'+body+'</div><div class="actions"><button class="iconbtn ebtn">Düzenle</button><button class="iconbtn dbtn">Sil</button></div></div>';
+    d.querySelector(".ebtn").onclick=()=>editObservation(o);
+    const dbtn=d.querySelector(".dbtn");
+    dbtn.onclick=function(){
+      if(this.dataset.confirm==="1"){ deleteObservation(o.id); }
+      else{
+        this.dataset.confirm="1"; this.textContent="Onayla!"; this.classList.add("danger");
+        const self=this;
+        setTimeout(()=>{ self.dataset.confirm=""; self.textContent="Sil"; self.classList.remove("danger"); },3000);
+      }
+    };
+    h.appendChild(d);
+  });
+}
+$("mSave").onclick=async ()=>{
+  const detail=$("mDetail").value.trim(); const tags=[...selectedTags];
+  if(!tags.length && !detail){ toast("Etiket seçin veya not yazın."); return; }
+  try{
+    if(editingId){
+      const { error } = await db.from("observations").update({ tags, note_detail: detail||null }).eq("id", editingId);
+      if(error) throw error; toast("Güncellendi ✓"); editingId=null; clearSelection(); setMode("new");
+    }else{
+      const { error } = await db.from("observations").insert({ student_id: currentStudent.id, tags, note_detail: detail||null });
+      if(error) throw error; toast("Not kaydedildi ✓"); clearSelection();
+    }
+    loadHistory(currentStudent.id);
+  }catch(e){ reportWriteError(e); }
+};
+
+/* ===== İNTERNET KONTROLÜ — canlı gözetim + Tekrar Dene ===== */
+$("netRetry").onclick = () => boot();
+window.addEventListener("offline", () => setNetBanner("err", "İnternet bağlantısı koptu. Notlar şu an kaydedilemeyecek."));
+window.addEventListener("online",  () => { setNetBanner("ok", "Bağlantı geri geldi, yükleniyor…"); boot(); });
+
+boot();
+</script>
+</body>
+</html>
