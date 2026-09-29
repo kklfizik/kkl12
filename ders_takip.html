@@ -2,94 +2,171 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Fizik Ders Takip</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#eef1f7; color:#1f2937; }
-  header { background:#1e3a8a; color:#fff; padding:14px 16px; position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
-  header h1 { font-size:18px; margin:0; flex:1; }
-  header .sub { font-size:12px; opacity:.85; }
-  #backBtn, #manageBtn { background:rgba(255,255,255,.18); border:0; color:#fff; font-size:14px; padding:8px 12px; border-radius:8px; cursor:pointer; }
-  #backBtn { display:none; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin:0; background:#eef1f7; color:#1f2937; font-size:16px;
+    touch-action: manipulation; overscroll-behavior-y: none;
+  }
 
-  /* ===== İNTERNET KONTROLÜ — şerit stilleri ===== */
-  #netBanner { display:none; flex-basis:100%; align-items:center; justify-content:space-between; gap:10px;
-               margin-top:4px; padding:10px 12px; border-radius:10px; font-size:14px; line-height:1.35; }
+  /* ===== Başlık çubuğu: iki satır (mobile-first) ===== */
+  header {
+    background:#1e3a8a; color:#fff;
+    padding:10px 12px; padding-top:calc(10px + env(safe-area-inset-top));
+    position:sticky; top:0; z-index:5;
+  }
+  .hrow1 { display:flex; align-items:center; gap:8px; }
+  .hrow1 h1 { font-size:16px; margin:0; flex:1 1 auto; min-width:0;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hrow2 { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+  .hrow2 .sub { font-size:13px; opacity:.9; flex:1 1 auto; min-width:0;
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #backBtn, #manageBtn {
+    background:rgba(255,255,255,.18); border:0; color:#fff; font-size:14px;
+    padding:9px 12px; border-radius:9px; cursor:pointer; min-height:44px;
+    display:inline-flex; align-items:center; justify-content:center; white-space:nowrap;
+  }
+  #backBtn { display:none; }
+  #backBtn:active, #manageBtn:active { transform:scale(.96); background:rgba(255,255,255,.28); }
+
+  /* ===== İnternet şeridi ===== */
+  #netBanner { display:none; align-items:center; justify-content:space-between; gap:8px;
+               margin-top:8px; padding:10px 12px; border-radius:10px; font-size:14px; line-height:1.35; }
   #netBanner.err { background:#fee2e2; color:#7f1d1d; border:1px solid #dc2626; }
   #netBanner.ok  { background:#dcfce7; color:#14532d; border:1px solid #16a34a; }
-  #netRetry { background:#7f1d1d; color:#fff; border:0; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  #netRetry { background:#7f1d1d; color:#fff; border:0; border-radius:8px;
+              padding:8px 14px; font-size:14px; cursor:pointer; white-space:nowrap; min-height:40px; }
   #netRetry:active { transform:scale(.96); }
 
-  main { padding:14px; max-width:760px; margin:0 auto; }
-  #status { padding:12px 14px; border-radius:10px; background:#fff; border:1px solid #e5e7eb; margin-bottom:14px; font-size:14px; }
+  main { padding:12px; max-width:820px; margin:0 auto; }
+  #status { padding:12px 14px; border-radius:11px; background:#fff; border:1px solid #e5e7eb;
+            margin-bottom:12px; font-size:15px; line-height:1.4; }
   #status.ok { border-color:#bbf7d0; background:#f0fdf4; }
   #status.err { border-color:#fecaca; background:#fef2f2; color:#991b1b; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
-  .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer; transition:.12s; }
+
+  /* ===== Izgara: telefonda 3 sütun, tablette 4-5, PC'de akışkan ===== */
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  @media (min-width:600px){ .grid { grid-template-columns:repeat(4, 1fr); gap:10px; } }
+  @media (min-width:820px){ .grid { grid-template-columns:repeat(5, 1fr); } }
+  @media (min-width:1024px){ .grid { grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); } }
+  .card {
+    background:#fff; border:1px solid #e5e7eb; border-radius:13px;
+    padding:12px 6px; text-align:center; cursor:pointer; transition:.12s;
+    min-height:72px; display:flex; flex-direction:column; justify-content:center;
+  }
   .card:active { transform:scale(.96); }
-  .card .name { font-weight:600; font-size:14px; line-height:1.25; }
-  .card .meta { font-size:11px; color:#6b7280; margin-top:4px; }
-  .sube { font-size:20px; font-weight:700; }
-  .addbtn { width:100%; background:#16a34a; color:#fff; border:0; border-radius:10px; padding:13px; font-size:15px; cursor:pointer; margin-bottom:12px; }
+  .card .name { font-weight:600; font-size:14px; line-height:1.2;
+                overflow-wrap:anywhere; word-break:break-word; }
+  .card .meta { font-size:12px; color:#6b7280; margin-top:5px; }
+  .sube { font-size:18px; font-weight:700; }
+  @media (min-width:600px){ .sube { font-size:20px; } }
+
+  /* ===== Öğrenci yönetimi ===== */
+  .addbtn { width:100%; background:#16a34a; color:#fff; border:0; border-radius:11px;
+            padding:14px; font-size:16px; cursor:pointer; margin-bottom:12px; min-height:50px; }
   .addbtn:active { transform:scale(.98); }
-  .srow { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; margin-bottom:8px; }
-  .srow .info { flex:1; min-width:0; }
-  .srow .nm { font-weight:600; font-size:14px; }
-  .srow .mt { font-size:11px; color:#6b7280; }
-  .actions { display:flex; gap:4px; flex-shrink:0; }
-  .iconbtn { background:#fff; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; white-space:nowrap; }
-  .iconbtn:active { transform:scale(.95); }
+  .srow { background:#fff; border:1px solid #e5e7eb; border-radius:11px;
+          padding:11px 12px; margin-bottom:9px; display:flex; flex-direction:column; gap:9px; }
+  .srow .info { min-width:0; }
+  .srow .nm { font-weight:600; font-size:15px; overflow-wrap:anywhere; }
+  .srow .mt { font-size:13px; color:#6b7280; margin-top:2px; }
+  .actions { display:flex; gap:8px; }
+  .actions .iconbtn { flex:1; }
+  .iconbtn { background:#fff; border:1px solid #d1d5db; border-radius:9px;
+             padding:10px 12px; font-size:14px; cursor:pointer; white-space:nowrap; min-height:44px; }
+  .iconbtn:active { transform:scale(.96); }
   .iconbtn.danger { background:#dc2626; color:#fff; border-color:#dc2626; }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:10; }
-  #sheet { display:none; position:fixed; left:0; right:0; bottom:0; max-height:88vh; overflow:auto; background:#fff; border-radius:18px 18px 0 0; z-index:11; padding:16px 16px 24px; box-shadow:0 -6px 24px rgba(0,0,0,.18); }
-  #sheet h2 { margin:0 0 2px; font-size:18px; }
-  #sheet .who { font-size:12px; color:#6b7280; margin-bottom:10px; }
-  .modeRow { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-  .modebadge { font-size:12px; padding:3px 10px; border-radius:999px; background:#e0e7ff; color:#312e81; font-weight:600; }
+  @media (min-width:600px){
+    .srow { flex-direction:row; align-items:center; }
+    .srow .info { flex:1; }
+    .actions { flex:0 0 auto; }
+    .actions .iconbtn { flex:0 0 auto; }
+  }
+
+  /* ===== Alt panel: not ===== */
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:10; }
+  #sheet {
+    display:none; position:fixed; left:0; right:0; bottom:0;
+    height:90vh; height:90dvh; overflow:auto; overscroll-behavior:contain;
+    background:#fff; border-radius:20px 20px 0 0; z-index:11;
+    padding:14px 14px calc(16px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 26px rgba(0,0,0,.2);
+  }
+  .grabber { width:42px; height:5px; border-radius:99px; background:#d1d5db; margin:0 auto 12px; }
+  #sheet h2 { margin:0 0 2px; font-size:19px; }
+  #sheet .who { font-size:13px; color:#6b7280; margin-bottom:10px; }
+  .modeRow { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .modebadge { font-size:13px; padding:5px 12px; border-radius:999px; background:#e0e7ff; color:#312e81; font-weight:600; }
   .modebadge.edit { background:#fef3c7; color:#92400e; }
-  .linkbtn { background:none; border:0; color:#1e3a8a; font-size:13px; cursor:pointer; text-decoration:underline; padding:2px 4px; }
-  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-  .chip { border:1px solid #d1d5db; background:#f9fafb; border-radius:999px; padding:8px 12px; font-size:13px; cursor:pointer; user-select:none; }
+  .linkbtn { background:none; border:0; color:#1e3a8a; font-size:14px; cursor:pointer; text-decoration:underline; padding:6px 4px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .chip { border:1px solid #d1d5db; background:#f9fafb; border-radius:999px;
+          padding:10px 14px; font-size:15px; cursor:pointer; user-select:none; min-height:44px;
+          display:inline-flex; align-items:center; }
+  .chip:active { transform:scale(.96); }
   .chip.pos.on { background:#dcfce7; border-color:#16a34a; color:#14532d; }
   .chip.neg.on { background:#fee2e2; border-color:#dc2626; color:#7f1d1d; }
   .chip.neu.on { background:#e0e7ff; border-color:#4f46e5; color:#312e81; }
-  textarea { width:100%; min-height:64px; border:1px solid #d1d5db; border-radius:10px; padding:10px; font:inherit; resize:vertical; }
-  .row { display:flex; gap:10px; margin-top:12px; }
-  .btn { flex:1; border:0; border-radius:10px; padding:13px; font-size:15px; cursor:pointer; }
+  textarea { width:100%; min-height:72px; border:1px solid #d1d5db; border-radius:11px;
+             padding:12px; font:inherit; font-size:16px; resize:vertical; }
+  .row { display:flex; gap:10px; margin-top:14px; }
+  .btn { flex:1; border:0; border-radius:11px; padding:14px; font-size:16px; cursor:pointer; min-height:50px; }
+  .btn:active { transform:scale(.98); }
   .btn.save { background:#1e3a8a; color:#fff; }
   .btn.cancel { background:#e5e7eb; color:#374151; }
-  .hist { margin-top:14px; border-top:1px dashed #e5e7eb; padding-top:10px; }
-  .hist h3 { font-size:13px; color:#6b7280; margin:0 0 8px; }
-  .hitem { background:#f9fafb; border:1px solid #eee; border-radius:10px; padding:8px 10px; margin-bottom:8px; font-size:13px; }
-  .hitem .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .hitem .body { flex:1; }
-  .hitem .d { color:#6b7280; font-size:11px; }
-  .hitem .t { display:inline-block; margin:2px 4px 0 0; padding:2px 8px; border-radius:999px; font-size:11px; }
+  .hist { margin-top:16px; border-top:1px dashed #e5e7eb; padding-top:12px; }
+  .hist h3 { font-size:14px; color:#6b7280; margin:0 0 10px; }
+  .hitem { background:#f9fafb; border:1px solid #eee; border-radius:11px;
+           padding:11px 12px; margin-bottom:9px; font-size:14px;
+           display:flex; flex-direction:column; gap:9px; }
+  .hitem .body { min-width:0; }
+  .hitem .d { color:#6b7280; font-size:12px; }
+  .hitem .t { display:inline-block; margin:3px 5px 0 0; padding:3px 10px; border-radius:999px; font-size:12px; }
   .t.pos{background:#dcfce7;color:#14532d;} .t.neg{background:#fee2e2;color:#7f1d1d;} .t.neu{background:#e0e7ff;color:#312e81;}
-  #formOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:12; }
-  #formSheet { display:none; position:fixed; left:0; right:0; bottom:0; max-height:88vh; overflow:auto; background:#fff; border-radius:18px 18px 0 0; z-index:13; padding:16px 16px 24px; box-shadow:0 -6px 24px rgba(0,0,0,.18); }
-  #formSheet h2 { margin:0 0 4px; font-size:18px; }
-  #formSheet .fcls { font-size:13px; color:#6b7280; margin-bottom:8px; }
-  .fgroup label { font-size:12px; color:#6b7280; display:block; margin:10px 0 4px; }
-  .fgroup input { width:100%; border:1px solid #d1d5db; border-radius:8px; padding:10px; font:inherit; }
+  @media (min-width:600px){
+    .hitem { flex-direction:row; align-items:flex-start; }
+    .hitem .body { flex:1; }
+  }
+
+  /* ===== Form paneli (öğrenci ekle/düzenle) ===== */
+  #formOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:12; }
+  #formSheet {
+    display:none; position:fixed; left:0; right:0; bottom:0;
+    max-height:90vh; max-height:90dvh; overflow:auto; overscroll-behavior:contain;
+    background:#fff; border-radius:20px 20px 0 0; z-index:13;
+    padding:14px 14px calc(16px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 26px rgba(0,0,0,.2);
+  }
+  #formSheet h2 { margin:0 0 4px; font-size:19px; }
+  #formSheet .fcls { font-size:14px; color:#6b7280; margin-bottom:6px; }
+  .fgroup label { font-size:13px; color:#6b7280; display:block; margin:12px 0 5px; }
+  .fgroup input { width:100%; border:1px solid #d1d5db; border-radius:10px;
+                  padding:12px; font:inherit; font-size:16px; }
   .frow2 { display:flex; gap:10px; }
   .frow2 .fgroup { flex:1; }
-  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111827; color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:.25s; z-index:20; pointer-events:none; }
+
+  #toast { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom));
+           transform:translateX(-50%); background:#111827; color:#fff;
+           padding:11px 18px; border-radius:11px; font-size:14px; opacity:0;
+           transition:.25s; z-index:30; pointer-events:none; max-width:90vw; text-align:center; }
   #toast.show { opacity:1; }
 </style>
 </head>
 <body>
 <header>
-  <button id="backBtn">← Geri</button>
-  <div style="flex:1">
+  <div class="hrow1">
+    <button id="backBtn">← Geri</button>
     <h1>Fizik Ders Takip</h1>
-    <div class="sub" id="hdrSub">Şube seçiniz</div>
   </div>
-  <button id="manageBtn">👥 Öğrenciler</button>
-
-  <!-- ===== İNTERNET KONTROLÜ — şerit ===== -->
+  <div class="hrow2">
+    <span class="sub" id="hdrSub">Şube seçiniz</span>
+    <button id="manageBtn">👥 Öğrenciler</button>
+  </div>
   <div id="netBanner">
     <span id="netMsg"></span>
     <button id="netRetry">Tekrar Dene</button>
@@ -101,8 +178,10 @@
   <div id="content"></div>
 </main>
 
+<!-- Not paneli -->
 <div id="overlay"></div>
 <div id="sheet">
+  <div class="grabber"></div>
   <h2 id="mName"></h2>
   <div class="who" id="mWho"></div>
   <div class="modeRow">
@@ -118,8 +197,10 @@
   <div class="hist"><h3>Geçmiş notlar</h3><div id="mHist"></div></div>
 </div>
 
+<!-- Öğrenci formu -->
 <div id="formOverlay"></div>
 <div id="formSheet">
+  <div class="grabber"></div>
   <h2 id="fTitle">Yeni Öğrenci</h2>
   <div class="fcls" id="fCls"></div>
   <div class="frow2">
@@ -172,11 +253,11 @@ let editingId = null;
 let editingStudentId = null;
 
 function setStatus(msg, kind){ statusEl.textContent = msg; statusEl.className = kind || ""; }
-function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1900); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function fmtDate(d){ try{ return new Date(d).toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric"});}catch(_){return d;} }
 
-/* ===== İNTERNET KONTROLÜ — yardımcılar ===== */
+/* ===== İnternet kontrolü yardımcıları ===== */
 function isNetworkError(e){
   const m = (e && e.message) ? String(e.message) : "";
   return (e instanceof TypeError) || /failed to fetch|network|fetch|timeout|enotfound|econnrefused|unreachable/i.test(m);
@@ -185,17 +266,15 @@ function setNetBanner(state, msg){
   const b = $("netBanner");
   if(state === "hide"){ b.style.display="none"; b.className=""; return; }
   b.style.display = "flex";
-  b.className = state; // "err" veya "ok"
+  b.className = state;
   $("netMsg").textContent = msg || (state==="err" ? "İnternet bağlantısı sorunu." : "Bağlantı kuruldu.");
   $("netRetry").style.display = (state==="err") ? "inline-block" : "none";
   if(state === "ok"){ setTimeout(()=>setNetBanner("hide"), 2500); }
 }
-// Okuma (veri çekme) hataları: ağ hatasıysa şerit, değilse durum kutusu
 function reportReadError(e, fallback){
-  if(isNetworkError(e)){ setNetBanner("err", "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip 'Tekrar Dene' butonuna basın."); }
+  if(isNetworkError(e)){ setNetBanner("err", "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip 'Tekrar Dene' butonuna basın."); }
   else { setStatus(fallback || ("Hata: " + (e && e.message ? e.message : e)), "err"); }
 }
-// Yazma (kaydet/sil/güncelle) hataları: ağ hatasıysa şerit + net toast
 function reportWriteError(e){
   if(isNetworkError(e)){ setNetBanner("err", "İnternet yok; işlem kaydedilemedi."); toast("İnternet yok, kaydedilemedi."); }
   else { toast("İşlem başarısız: " + (e && e.message ? e.message : e)); }
@@ -204,15 +283,13 @@ function reportWriteError(e){
 /* ===== Açılış ===== */
 async function boot(){
   viewMode="track"; manageClass=null;
-  // 1) Cihaz ağa bağlı mı?
   if(!navigator.onLine){
     setNetBanner("err", "İnternet bağlantısı bulunamadı. Bağlantınızı kontrol edip 'Tekrar Dene' butonuna basın.");
     setStatus("Bağlantı bekleniyor…", "");
     return;
   }
-  setNetBanner("hide"); // varsa bayat uyarıyı temizle
+  setNetBanner("hide");
   try{
-    // 2) Sunucuya erişilebiliyor mu?
     const { count, error } = await db.from("classes").select("*",{count:"exact",head:true});
     if(error) throw error;
     if(!count){ setStatus("Hiç şube bulunamadı. Supabase > Table Editor > classes üzerinden şube ekleyin.","err"); contentEl.innerHTML=""; return; }
@@ -240,7 +317,7 @@ async function loadClasses(){
 async function selectClass(c){
   viewMode="track"; currentClass=c;
   setNetBanner("hide");
-  hdrSub.textContent=c.name+" · öğrenciler"; backBtn.style.display="inline-block";
+  hdrSub.textContent=c.name+" · öğrenciler"; backBtn.style.display="inline-flex";
   setStatus(c.name+" öğrencileri yükleniyor…","");
   const { data, error } = await db.from("students").select("id,seat_number,student_number,full_name")
     .eq("class_id",c.id).order("seat_number",{ascending:true});
@@ -259,7 +336,7 @@ async function selectClass(c){
 async function openManage(){
   viewMode="manage"; manageClass=null;
   setNetBanner("hide");
-  hdrSub.textContent="Öğrenci Yönetimi · şube seçiniz"; backBtn.style.display="inline-block";
+  hdrSub.textContent="Öğrenci Yönetimi · şube seçiniz"; backBtn.style.display="inline-flex";
   const { data, error } = await db.from("classes").select("id,name").order("name");
   if(error){ reportReadError(error); return; }
   setStatus("Yönetmek istediğiniz şubeyi seçin.","ok");
@@ -274,7 +351,7 @@ async function openManage(){
 async function renderManageStudents(c){
   viewMode="manage"; manageClass=c;
   setNetBanner("hide");
-  hdrSub.textContent="Öğrenci Yönetimi · "+c.name; backBtn.style.display="inline-block";
+  hdrSub.textContent="Öğrenci Yönetimi · "+c.name; backBtn.style.display="inline-flex";
   setStatus(c.name+" öğrencileri yükleniyor…","");
   const { data, error } = await db.from("students").select("id,seat_number,student_number,full_name")
     .eq("class_id",c.id).order("seat_number",{ascending:true});
@@ -284,7 +361,7 @@ async function renderManageStudents(c){
   const add=document.createElement("button"); add.className="addbtn"; add.textContent="＋ Yeni Öğrenci Ekle";
   add.onclick=()=>openStudentForm(null); contentEl.appendChild(add);
   const wrap=document.createElement("div"); contentEl.appendChild(wrap);
-  if(!data.length){ wrap.innerHTML='<div style="color:#6b7280;font-size:14px;padding:8px">Bu şubede henüz öğrenci yok.</div>'; return; }
+  if(!data.length){ wrap.innerHTML='<div style="color:#6b7280;font-size:15px;padding:8px">Bu şubede henüz öğrenci yok.</div>'; return; }
   data.forEach(s=>{
     const r=document.createElement("div"); r.className="srow";
     r.innerHTML='<div class="info"><div class="nm">'+esc(s.full_name)+'</div>'+
@@ -293,7 +370,7 @@ async function renderManageStudents(c){
     r.querySelector(".ebtn").onclick=()=>openStudentForm(s);
     const dbtn=r.querySelector(".dbtn");
     dbtn.onclick=function(){
-      if(this.dataset.confirm==="1"){ deleteStudent(s.id, this); }
+      if(this.dataset.confirm==="1"){ deleteStudent(s.id); }
       else{
         this.dataset.confirm="1"; this.textContent="Onayla!"; this.classList.add("danger");
         const self=this;
@@ -313,7 +390,7 @@ function openStudentForm(s){
   $("fNum").value  = s ? (s.student_number ?? "") : "";
   $("fName").value = s ? s.full_name : "";
   formOverlay.style.display="block"; formSheet.style.display="block";
-  setTimeout(()=>$("fName").focus(),50);
+  setTimeout(()=>$("fName").focus(),80);
 }
 function closeStudentForm(){ formOverlay.style.display="none"; formSheet.style.display="none"; editingStudentId=null; }
 formOverlay.onclick=closeStudentForm; $("fCancel").onclick=closeStudentForm;
@@ -337,7 +414,7 @@ $("fSave").onclick=async ()=>{
   }catch(e){ reportWriteError(e); }
 };
 
-async function deleteStudent(id, btn){
+async function deleteStudent(id){
   try{
     const { error } = await db.from("students").delete().eq("id", id);
     if(error) throw error;
@@ -346,7 +423,7 @@ async function deleteStudent(id, btn){
   }catch(e){ reportWriteError(e); }
 }
 
-/* ===== Geri butonu ===== */
+/* ===== Geri butonu (mod + alt ekran) ===== */
 backBtn.onclick=()=>{
   if(viewMode==="manage"){
     if(manageClass) openManage();
@@ -375,6 +452,7 @@ function openSheet(s){
   });
   clearSelection(); setMode("new"); loadHistory(s.id);
   overlay.style.display="block"; sheet.style.display="block";
+  sheet.scrollTop=0;
 }
 function closeSheet(){ overlay.style.display="none"; sheet.style.display="none"; currentStudent=null; editingId=null; }
 overlay.onclick=closeSheet; $("mCancel").onclick=closeSheet;
@@ -384,7 +462,7 @@ function editObservation(o){
   editingId=o.id; selectedTags=new Set(o.tags||[]);
   document.querySelectorAll("#mChips .chip").forEach(c=>c.classList.toggle("on", selectedTags.has(c.textContent)));
   $("mDetail").value=o.note_detail||""; setMode("edit");
-  $("sheet").scrollTo({top:0,behavior:"smooth"});
+  sheet.scrollTo({top:0,behavior:"smooth"});
 }
 async function deleteObservation(id){
   try{
@@ -395,20 +473,21 @@ async function deleteObservation(id){
   }catch(e){ reportWriteError(e); }
 }
 async function loadHistory(id){
-  const h=$("mHist"); h.innerHTML="<div style='color:#9ca3af;font-size:12px'>Yükleniyor…</div>";
+  const h=$("mHist"); h.innerHTML="<div style='color:#9ca3af;font-size:13px'>Yükleniyor…</div>";
   const { data, error } = await db.from("observations").select("id,observation_date,tags,note_detail,created_at")
     .eq("student_id",id).order("created_at",{ascending:false}).limit(30);
   if(error){
-    if(isNetworkError(error)) setNetBanner("err", "Geçmiş notlar yüklenemedi. İnternet bağlantınızı kontrol edin.");
-    h.innerHTML="<div style='color:#991b1b;font-size:12px'>"+esc(error.message)+"</div>"; return;
+    if(isNetworkError(error)) setNetBanner("err", "Geçmiş notlar yüklenemedi. Bağlantınızı kontrol edin.");
+    h.innerHTML="<div style='color:#991b1b;font-size:13px'>"+esc(error.message)+"</div>"; return;
   }
-  if(!data.length){ h.innerHTML="<div style='color:#9ca3af;font-size:12px'>Henüz not yok.</div>"; return; }
+  if(!data.length){ h.innerHTML="<div style='color:#9ca3af;font-size:13px'>Henüz not yok.</div>"; return; }
   h.innerHTML="";
   data.forEach(o=>{
     const d=document.createElement("div"); d.className="hitem";
     let tagsHtml=(o.tags||[]).map(t=>{ const meta=TAGS.find(x=>x.label===t); const ty=meta?meta.type:"neu"; return '<span class="t '+ty+'">'+esc(t)+'</span>'; }).join("");
-    const body='<div class="d">'+fmtDate(o.observation_date)+'</div>'+tagsHtml+(o.note_detail?'<div style="margin-top:4px">'+esc(o.note_detail)+'</div>':"");
-    d.innerHTML='<div class="top"><div class="body">'+body+'</div><div class="actions"><button class="iconbtn ebtn">Düzenle</button><button class="iconbtn dbtn">Sil</button></div></div>';
+    const body='<div class="d">'+fmtDate(o.observation_date)+'</div>'+tagsHtml+(o.note_detail?'<div style="margin-top:5px">'+esc(o.note_detail)+'</div>':"");
+    d.innerHTML='<div class="body">'+body+'</div>'+
+      '<div class="actions"><button class="iconbtn ebtn">Düzenle</button><button class="iconbtn dbtn">Sil</button></div>';
     d.querySelector(".ebtn").onclick=()=>editObservation(o);
     const dbtn=d.querySelector(".dbtn");
     dbtn.onclick=function(){
@@ -437,7 +516,7 @@ $("mSave").onclick=async ()=>{
   }catch(e){ reportWriteError(e); }
 };
 
-/* ===== İNTERNET KONTROLÜ — canlı gözetim + Tekrar Dene ===== */
+/* ===== Canlı ağ gözetimi + Tekrar Dene ===== */
 $("netRetry").onclick = () => boot();
 window.addEventListener("offline", () => setNetBanner("err", "İnternet bağlantısı koptu. Notlar şu an kaydedilemeyecek."));
 window.addEventListener("online",  () => { setNetBanner("ok", "Bağlantı geri geldi, yükleniyor…"); boot(); });
