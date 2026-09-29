@@ -70,7 +70,8 @@
         .btn-sil:hover{background:#991b1b;color:#fff}
         .btn-analiz{background:#372A6E;color:#C9C2F2;border:1px solid #4a3d8f;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-right:6px;transition:all .2s}
         .btn-analiz:hover{background:#4a3d8f;color:#fff}
-        /* ALT KAYIT SATIRLARI */
+        .btn-ai{background:#7A6FE0;color:#fff;border:1px solid #8B7FE8;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-right:6px;transition:all .2s}
+        .btn-ai:hover{background:#8B7FE8;color:#fff}
         .alt-satir{display:none;background:#191338}
         .alt-satir:hover{background:#191338;cursor:default}
         .alt-satir td{padding:0 15px 15px 15px}
@@ -149,7 +150,7 @@
         </div>
 
         <div class="tablo-baslik">
-            <h3>Öğrenci Tablosu <span style="color:#A79FE8;font-size:13px">(Kayıt listesi: satıra tıkla | Analiz: 📊 | Sil: 🗑️)</span></h3>
+            <h3>Öğrenci Tablosu <span style="color:#A79FE8;font-size:13px">(Kayıt listesi: satıra tıkla | Analiz:  | AI Rapor: 🤖 | Sil: 🗑️)</span></h3>
         </div>
         <table>
             <thead>
@@ -186,7 +187,7 @@
                 <h4>📝 Gelişim Raporu (Düzenleyip Gönderebilirsiniz)</h4>
                 <textarea id="rapor-metin" class="rapor-textarea"></textarea>
                 <div class="rapor-butonlar">
-                    <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()">📤 Öğrenciye Gönder</button>
+                    <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()"> Öğrenciye Gönder</button>
                     <button class="btn btn-mavi" onclick="raporuKopyala()">📋 Kopyala</button>
                 </div>
             </div>
@@ -194,7 +195,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.6.0";
+    var VERSIYON="v2.7.0";
     var OGRETMEN_1_PIN="1234";
     var OGRETMEN_2_PIN="5678";
 
@@ -228,9 +229,6 @@
     var chartDetay=null;
     var chartDenemeDetay=null;
 
-    // ==========================================
-    // TARİH BİÇİMLENDİRME
-    // ==========================================
     function tarihKisa(iso){
         return new Date(iso).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'2-digit'});
     }
@@ -360,9 +358,6 @@
         return liste.length?liste[liste.length-1].olusturma_tarihi:null;
     }
 
-    // ==========================================
-    // TABLO + AÇILIR KAYIT LİSTESİ
-    // ==========================================
     function tabloyuDoldur(veriler){
         var ogrenciler={};
         veriler.forEach(function(v){
@@ -396,11 +391,11 @@
                 '<td class="'+(sr?'tarih-hucre-var':'tarih-hucre')+'">'+(sr?tarihFmt(sr):'-')+'</td>'+
                 '<td style="white-space:nowrap">'+
                     '<button class="btn-analiz" onclick="event.stopPropagation();ogrenciSec(\''+kod+'\',\''+o.sube+'\')">📊</button>'+
+                    '<button class="btn-ai" onclick="event.stopPropagation();aiRaporuHazirla(\''+kod+'\',\''+o.sube+'\')">🤖</button>'+
                     '<button class="btn-sil" onclick="event.stopPropagation();ogrenciSil(\''+kod+'\')">🗑️</button>'+
                 '</td>';
             govde.appendChild(tr);
 
-            // ALT SATIR: TÜM KAYITLAR (ESKİDEN YENİYE)
             var kayitlar=tumVeriler.filter(function(v){return v.ogrenci_kodu===kod})
                 .map(function(v){return {t:v.created_at,tip:'Çalışma',detay:'['+v.sinav_tipi+'] '+v.konu+' • '+v.cozulen_soru+' soru • '+v.dogru_sayisi+'D/'+v.yanlis_sayisi+'Y • '+v.sure_dakika+' dk'}})
                 .concat(tumDenemeler.filter(function(v){return v.ogrenci_kodu===kod})
@@ -458,6 +453,21 @@
     }
 
     function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
+
+    // ==========================================
+    // TABLODAN AI RAPORU HAZIRLA
+    // ==========================================
+    async function aiRaporuHazirla(kod,sube){
+        seciliOgrenciKodu=kod;
+        seciliOgrenciSubesi=sube;
+        document.getElementById('secili-ogrenci-adi').textContent='📊 '+kod+' ('+sube+')';
+        document.getElementById('ogrenci-detay').style.display='block';
+        document.getElementById('rapor-alani').style.display='none';
+        document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
+        ogrenciGrafigiCiz();
+        ogrenciDenemeGrafigiCiz();
+        await aiRaporuOlustur();
+    }
 
     async function aiRaporuOlustur(){
         if(!seciliOgrenciKodu)return;
@@ -517,8 +527,8 @@
             'LÜTFEN ŞU YAPIDA BİR RAPOR YAZ:\n'+
             '1. 🌟 GÜÇLÜ YÖNLER: En başarılı olduğu 2-3 konuyu belirt ve takdir et.\n'+
             '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver.\n'+
-            '3. 📈 DENEME ANALİZİ: Deneme geçmişi varsa net gelişim trendini yorumla (artış/düşüş/stabil). Yoksa bu bölümü kısa geç.\n'+
-            '4. 📋 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
+            '3.  DENEME ANALİZİ: Deneme geçmişi varsa net gelişim trendini yorumla (artış/düşüş/stabil). Yoksa bu bölümü kısa geç.\n'+
+            '4.  GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
             '5. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
             'Raporu doğrudan öğrenciye hitaben yaz. "Sayın '+seciliOgrenciKodu+'" diye başla. '+
             'Fizik terminolojisini doğru kullan. Samimi ama profesyonel bir öğretmen tonu kullan. '+
