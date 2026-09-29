@@ -150,7 +150,7 @@
         </div>
 
         <div class="tablo-baslik">
-            <h3>Öğrenci Tablosu <span style="color:#A79FE8;font-size:13px">(Kayıt listesi: satıra tıkla | Analiz:  | AI Rapor: 🤖 | Sil: 🗑️)</span></h3>
+            <h3>Öğrenci Tablosu <span style="color:#A79FE8;font-size:13px">(Sıralama: en son kayıt en üstte | Kayıtlar: satıra tıkla | 📊 grafik | 🤖 AI | 🗑️ sil)</span></h3>
         </div>
         <table>
             <thead>
@@ -187,7 +187,7 @@
                 <h4>📝 Gelişim Raporu (Düzenleyip Gönderebilirsiniz)</h4>
                 <textarea id="rapor-metin" class="rapor-textarea"></textarea>
                 <div class="rapor-butonlar">
-                    <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()"> Öğrenciye Gönder</button>
+                    <button class="btn btn-yesil" onclick="raporuOgrenciyeGonder()">📤 Öğrenciye Gönder</button>
                     <button class="btn btn-mavi" onclick="raporuKopyala()">📋 Kopyala</button>
                 </div>
             </div>
@@ -195,7 +195,7 @@
     </div>
 
     <script>
-    var VERSIYON="v2.7.0";
+    var VERSIYON="v2.7.1";
     var OGRETMEN_1_PIN="1234";
     var OGRETMEN_2_PIN="5678";
 
@@ -358,6 +358,9 @@
         return liste.length?liste[liste.length-1].olusturma_tarihi:null;
     }
 
+    // ==========================================
+    // TABLO DOLDURMA (SON KAYIT SIRALAMASI)
+    // ==========================================
     function tabloyuDoldur(veriler){
         var ogrenciler={};
         veriler.forEach(function(v){
@@ -368,8 +371,16 @@
             ogrenciler[v.ogrenci_kodu].dogru+=(v.dogru_sayisi||0);
             ogrenciler[v.ogrenci_kodu].yanlis+=(v.yanlis_sayisi||0);
         });
+
+        var sirali=Object.keys(ogrenciler).sort(function(a,b){
+            var skA=sonKayitBul(a);
+            var skB=sonKayitBul(b);
+            var tA=skA?new Date(skA).getTime():0;
+            var tB=skB?new Date(skB).getTime():0;
+            return tB-tA;
+        });
+
         var govde=document.getElementById('tablo-govde');govde.innerHTML='';
-        var sirali=Object.keys(ogrenciler).sort(function(a,b){return ogrenciler[b].soru-ogrenciler[a].soru});
 
         sirali.forEach(function(kod){
             var o=ogrenciler[kod];
@@ -381,7 +392,7 @@
             var sr=sonRaporBul(kod);
 
             var tr=document.createElement('tr');
-            tr.onclick=function(){altSatirAc(kod)};
+            tr.onclick=function(){satirTiklandi(kod,o.sube)};
             tr.innerHTML='<td><strong>'+kod+'</strong></td>'+
                 '<td><span class="sube-rozet sube-'+o.sube+'">'+o.sube+'</span></td>'+
                 '<td>'+o.kayit+'</td><td>'+o.soru+'</td><td>'+o.sure+' dk</td>'+
@@ -427,10 +438,27 @@
         if(sirali.length===0)govde.innerHTML='<tr><td colspan="10" style="text-align:center;color:#A79FE8;padding:30px">Kayıt bulunamadı.</td></tr>';
     }
 
-    function altSatirAc(kod){
+    // ==========================================
+    // SATIR TIKLANDI: ALT SATIR + DETAY PANELİ
+    // ==========================================
+    function satirTiklandi(kod,sube){
+        // Alt satırı aç/kapa
         var el=document.getElementById('alt-'+kod);
-        if(!el)return;
-        el.style.display=(el.style.display==='table-row')?'none':'table-row';
+        if(el)el.style.display=(el.style.display==='table-row')?'none':'table-row';
+
+        // Detay panelini aç ve grafikleri çiz
+        seciliOgrenciKodu=kod;
+        seciliOgrenciSubesi=sube;
+        document.getElementById('secili-ogrenci-adi').textContent='📊 '+kod+' ('+sube+')';
+        document.getElementById('ogrenci-detay').style.display='block';
+        document.getElementById('rapor-alani').style.display='none';
+        ogrenciGrafigiCiz();
+        ogrenciDenemeGrafigiCiz();
+
+        // En alta kaydır
+        setTimeout(function(){
+            document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth',block:'start'});
+        },100);
     }
 
     async function ogrenciSil(kod){
@@ -444,26 +472,22 @@
 
     function ogrenciSec(kod,sube){
         seciliOgrenciKodu=kod;seciliOgrenciSubesi=sube;
-        document.getElementById('secili-ogrenci-adi').textContent='📊 '+kod+' ('+sube+')';
+        document.getElementById('secili-ogrenci-adi').textContent=' '+kod+' ('+sube+')';
         document.getElementById('ogrenci-detay').style.display='block';
         document.getElementById('rapor-alani').style.display='none';
-        document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
         ogrenciGrafigiCiz();
         ogrenciDenemeGrafigiCiz();
+        document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
     }
 
     function detayKapat(){document.getElementById('ogrenci-detay').style.display='none'}
 
-    // ==========================================
-    // TABLODAN AI RAPORU HAZIRLA
-    // ==========================================
     async function aiRaporuHazirla(kod,sube){
         seciliOgrenciKodu=kod;
         seciliOgrenciSubesi=sube;
         document.getElementById('secili-ogrenci-adi').textContent='📊 '+kod+' ('+sube+')';
         document.getElementById('ogrenci-detay').style.display='block';
         document.getElementById('rapor-alani').style.display='none';
-        document.getElementById('ogrenci-detay').scrollIntoView({behavior:'smooth'});
         ogrenciGrafigiCiz();
         ogrenciDenemeGrafigiCiz();
         await aiRaporuOlustur();
@@ -527,8 +551,8 @@
             'LÜTFEN ŞU YAPIDA BİR RAPOR YAZ:\n'+
             '1. 🌟 GÜÇLÜ YÖNLER: En başarılı olduğu 2-3 konuyu belirt ve takdir et.\n'+
             '2. ⚠️ GELİŞİM ALANLARI: Başarısı düşük konuları tespit et. Her biri için SOMUT ve FİZİĞE ÖZGÜ çalışma taktikleri ver.\n'+
-            '3.  DENEME ANALİZİ: Deneme geçmişi varsa net gelişim trendini yorumla (artış/düşüş/stabil). Yoksa bu bölümü kısa geç.\n'+
-            '4.  GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
+            '3. 📈 DENEME ANALİZİ: Deneme geçmişi varsa net gelişim trendini yorumla (artış/düşüş/stabil). Yoksa bu bölümü kısa geç.\n'+
+            '4. 📋 GENEL DEĞERLENDİRME: Çalışma süresi ve soru sayısı hakkında yorum yap. Hedeflere ulaşmak için haftalık öneri ver.\n'+
             '5. 💪 MOTİVASYON: Kısa, samimi ve cesaretlendirici bir kapanış.\n\n'+
             'Raporu doğrudan öğrenciye hitaben yaz. "Sayın '+seciliOgrenciKodu+'" diye başla. '+
             'Fizik terminolojisini doğru kullan. Samimi ama profesyonel bir öğretmen tonu kullan. '+
